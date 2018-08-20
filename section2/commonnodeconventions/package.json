@@ -1,0 +1,17 @@
+{
+  "name": "basicexample",
+  "version": "0.0.1",
+  "license": "UNLICENSED",
+  "private": true,
+  "description": "Simple file that declares a few functions and invokes them",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "jokes": "0.0.2"
+  }
+}
