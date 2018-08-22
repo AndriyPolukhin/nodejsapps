@@ -27,9 +27,35 @@ const server = http.createServer((req, res) => {
 
   req.on('end', () => {
     buffer += decoder.end();
-    res.end(`Payload received`);
-    console.log(`${buffer}`);
-    console.log(trimmedPath, method, headers, queryStringObject);
+
+    // 2.1. Choose the handler this request should go to.
+    // 2.2. If one is not found choose the not found handler
+    const chosenHandler = typeof (router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
+
+    // 2.3. Construct the data object to send to the handler
+    const data = {
+      trimmedPath,
+      queryStringObject,
+      method,
+      headers,
+      'payload': buffer
+    };
+
+    // 2.4. Route the request specified in the router
+    chosenHandler(data, function (statusCode, payload) {
+      // 2.4.1. Use the status code provided by the handler or use  deafult 200
+      statusCode = typeof (statusCode) == 'number' ? statusCode : 200;
+      // 2.4.2. Use the payload object provided or use the default object {}
+      payload = typeof (payload) == 'object' ? payload : {};
+
+      // 2.4.3. Covert the payload to a String
+      const payloadString = JSON.stringify(payload);
+      // 2.4.4. Return the response
+      res.writeHead(statusCode);
+      res.end(payloadString);
+      console.log('Returning this response: ', statusCode, payloadString);
+    });
+
   });
 });
 
@@ -37,22 +63,20 @@ const server = http.createServer((req, res) => {
 const port = 3000;
 server.listen(port, () => console.log(`Running on port: ${port}`));
 
-
-// 4. Define handlers
+// 4. Define Handlers
 const handlers = {};
-// 4.1 Sample handler
-handlers.sample = function (data, callback) {
 
-  // Callback a http status code, and payload an object
+handlers.sample = function (data, callback) {
+  // Callback a http status code and a payload object
   callback(406, { 'name': 'sample handler' });
 };
-// 4.2 Not found handler
-handlers.notfound = function (data, callback) {
+
+handlers.notFound = function (data, callback) {
   callback(404);
 };
 
-
 // 5. Define a request router
+
 const router = {
   'sample': handlers.sample
 };
