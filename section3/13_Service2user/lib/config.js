@@ -1,28 +1,28 @@
 /*
-* Create and export cinfiguration variables
+* Environments Configuration
 *
 */
 
-// 1. Container for the environmnets
+// 1. Environments container
 const environments = {};
 
-// 2. Staging (default) environment
+// 2. Staging (default) environments
 environments.staging = {
   'httpPort': 3000,
   'httpsPort': 3001,
-  'envName': 'staging'
+  'envName': 'staging',
+  'hashingSecret': 'thisIsASecret'
 };
-
-// 3. Production environment
+// 3. Production environments
 environments.production = {
   'httpPort': 5000,
-  'httpsPort': 50001,
-  'envName': 'production'
+  'httpsPort': 5001,
+  'envName': 'production',
+  'hashingSecret': 'thisIsASecret'
 };
-
-// 4. Determine which environment was passed as a command-line argument
+// 4. Chose the current environments
 const currentEnvironment = typeof (process.env.NODE_ENV) == 'string' ? process.env.NODE_ENV.toLowerCase() : '';
-// 5. Check that the current environment is one of the environments above, if not, default to the staging
+// 5. Environment to export
 const environmentToExport = typeof (environments[currentEnvironment]) == 'object' ? environments[currentEnvironment] : environments.staging;
-// 6. Export environment module
+// 6. Export module
 module.exports = environmentToExport;
