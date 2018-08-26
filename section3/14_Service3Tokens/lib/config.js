@@ -11,14 +11,14 @@ environments.staging = {
   'httpPort': 3000,
   'httpsPort': 3001,
   'envName': 'staging',
-  'hashed': 'ThisIsASecret ?????'
+  'hashingSecret': 'ThisIsASecret'
 }
 // 3. Production envrionment
 environments.production = {
   'httpPort': 5000,
   'httpsPort': 5001,
   'envName': 'production',
-  'hashed': 'ThisIsASecret'
+  'hashingSecret': 'ThisIsASecret'
 }
 
 // 4. Check for the current environment

@@ -15,8 +15,6 @@ const helpers = require('./lib/helpers');
 
 
 
-
-
 // 2. Server
 // 2.1. HTTP
 const httpServer = http.createServer((req, res) => {
@@ -56,7 +54,7 @@ const unifiedServer = (req, res) => {
             'queryStringObject': queryStringObject,
             'method': method,
             'headers': headers,
-            'payload': buffer
+            'payload': helpers.parseJsonToObject(buffer)
         };
         choseHandler(data, (statusCode, payload) => {
             statusCode = typeof (statusCode) == 'number' ? statusCode : 200;
@@ -75,4 +73,4 @@ const unifiedServer = (req, res) => {
 const router = {
     'ping': handlers.ping,
     'users': handlers.users
-}
+};
