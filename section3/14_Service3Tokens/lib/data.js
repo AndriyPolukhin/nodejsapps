@@ -6,6 +6,7 @@
 // 1. Dependencies
 const fs = require('fs');
 const path = require('path');
+const helpers = require('./helpers');
 
 // 2. Container for the module (to be exported)
 const lib = {};
@@ -41,7 +42,12 @@ lib.create = (dir, file, data, callback) => {
 // 4. Reading data from a file
 lib.read = (dir, file, callback) => {
   fs.readFile(lib.baseDir + dir + '/' + file + '.json', 'utf-8', (err, data) => {
-    callback(err, data);
+    if (!err && data) {
+      const parsedData = helpers.parseJsonToObject(data);
+      callback(false, parsedData);
+    } else {
+      callback(err, data);
+    }
   });
 };
 // 5. Updating data in the file
