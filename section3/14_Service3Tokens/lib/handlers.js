@@ -84,7 +84,6 @@ handlers._users.post = (data, callback) => {
           callback(500, { 'Error': 'Could not hash the user\'s password' });
         }
       } else {
-        // 5.2.3-1 User exist
         callback(400, { 'Error': 'A user with that phone number already exist' });
       }
     });
@@ -346,7 +345,7 @@ handlers._tokens.put = (data, callback) => {
             } else {
               callback(500, { 'Error': 'Could not update the token\'s exparation' });
             }
-          })
+          });
         } else {
           callback(400, { 'Error': 'The token has already expired and cannot be extended' });
         }
