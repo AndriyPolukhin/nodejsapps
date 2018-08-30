@@ -12,12 +12,12 @@ const config = require('./config');
 const handlers = {};
 
 // 3. Ping Handler
-handlers.ping = function(data, callback) {
+handlers.ping = function (data, callback) {
     callback(406, { 'ping': 'ping ping ping' });
 };
 
 // 4. Not found handler
-handlers.notFound = function(data, callback) {
+handlers.notFound = function (data, callback) {
     callback(404);
 };
 
@@ -516,7 +516,7 @@ handlers._checks.post = (data, callback) => {
                                         } else {
                                             callback(500, { 'Error': 'Colud not update the user with the new check' });
                                         }
-                                    })
+                                    });
                                 } else {
                                     callback(500, { 'Error': 'Could not create the new check' });
                                 }
