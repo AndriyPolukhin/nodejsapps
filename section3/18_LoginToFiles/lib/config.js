@@ -1,5 +1,5 @@
 /*
-* Environment configuration file
+* Environment configure file
 *
 */
 
@@ -19,7 +19,8 @@ environments.staging = {
     'fromPhone': '+15005550006'
   }
 };
-// 3. Production envrionment
+
+// 3. Production environment
 environments.production = {
   'httpPort': 5000,
   'httpsPort': 5001,
@@ -27,16 +28,17 @@ environments.production = {
   'hashingSecret': 'ThisIsASecret',
   'maxChecks': 5,
   'twilio': {
-    'accountSid': ' ',
-    'authToken': ' ',
-    'fromPhone': ' '
+    'accountSid': '',
+    'authToken': '',
+    'fromPhone': ''
   }
 };
 
-// 4. Check for the current environment
+// 4. Current Envrionment
 const currentEnvironment = typeof (process.env.NODE_ENV) == 'string' ? process.env.NODE_ENV.toLowerCase() : '';
-// 5. Chose the environment to export
+
+// 5. Environment to export
 const environmentToExport = typeof (environments[currentEnvironment]) == 'object' ? environments[currentEnvironment] : environments.staging;
 
-// 6. Export module for the environment
+// 6. Export the module
 module.exports = environmentToExport;
