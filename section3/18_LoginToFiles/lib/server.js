@@ -1,5 +1,5 @@
 /*
-* This are the server related taks
+* This are server related tasks
 *
 */
 
@@ -7,18 +7,19 @@
 const http = require('http');
 const https = require('https');
 const url = require('url');
-const StringDecoder = require('string_decoder').StringDeconder;
+const StringDecoder = require('string_decoder').StringDecoder;
 const config = require('./config');
 const fs = require('fs');
 const handlers = require('./handlers');
 const helpers = require('./helpers');
 const path = require('path');
 
-// 2 SERVER
-//2.0 Intantiate a server module object
+// 2. Server
+// 2.0 Instantiate a server modular object
 const server = {};
 
-// 2.1 HTTP
+
+// 2.1. HTTP
 server.httpServer = http.createServer((req, res) => {
   server.unifiedServer(req, res);
 });
@@ -28,15 +29,14 @@ server.httpsServerOptions = {
   'key': fs.readFileSync(path.join(__dirname, '/../https/key.pem')),
   'cert': fs.readFileSync(path.join(__dirname, '/../https/cert.pem'))
 };
-
-server.httpsServer = https.createServer(server.httpsOServerOptions, (req, res) => {
+server.httpsServer = https.createServer(server.httpsServerOptions, (req, res) => {
   server.unifiedServer(req, res);
 });
 
-// 2.3 UNIFIED SERVER
+// 2.3 UNIFIED
 server.unifiedServer = (req, res) => {
   const parsedUrl = url.parse(req.url, true);
-  const path = prsedUrl.pathname;
+  const path = parsedUrl.pathname;
   const trimmedPath = path.replace(/^\/+|\/+$/g, '');
 
   const queryStringObject = parsedUrl.query;
@@ -60,36 +60,36 @@ server.unifiedServer = (req, res) => {
       'payload': helpers.parseJsonToObject(buffer)
     };
     choseHandler(data, (statusCode, payload) => {
-      statusCode = typeof (statusCode) == 'number' ?
-        statusCode : 200;
-      payload = typeof (payload) == 'object' ?
-        payload : {};
+      statusCode = typeof (statusCode) == 'number' ? statusCode : 200;
+      payload = typeof (payload) == 'object' ? payload : {};
       const payloadString = JSON.stringify(payload);
 
       res.setHeader('Content-Type', 'application/json');
-      res.writeHaed(statusCode);
+      res.writeHead(statusCode);
       res.end(payloadString);
       console.log(`Response with this: ${statusCode} ${payloadString}`);
     });
   });
-};
 
+};
 // 4. Router
 server.router = {
   'ping': handlers.ping,
-  'usres': handlers.users,
+  'users': handlers.users,
   'tokens': handlers.tokens,
   'checks': handlers.checks
 };
 
-// 5. Init script
+
+
+// Init script
 server.init = () => {
-  // 5.1 Start the httpServer
+  // Start the httpServer
   server.httpServer.listen(config.httpPort, () => console.log(`Running server on port: ${config.httpPort}`));
 
-  // 5.2 Start the httpsServer
+  // Start the httpsServer
   server.httpsServer.listen(config.httpsPort, () => console.log(`Running server on port: ${config.httpsPort}`));
-};
+}
 
-// 6. Export the server
+// Export the server
 module.exports = server;

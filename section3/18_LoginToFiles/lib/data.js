@@ -1,5 +1,5 @@
 /*
-* Library for storing and editing data
+* Library for storign and editing data
 *
 */
 
@@ -12,38 +12,36 @@ const helpers = require('./helpers');
 const lib = {};
 // Define the directory of a data folder
 lib.baseDir = path.join(__dirname, '/../.data/');
-
 // 3. Writing data to a file
 lib.create = (dir, file, data, callback) => {
-  // 3.1 Open the file for writing/creat a file
+  // 3.1 Open the file for writing/create the file
   fs.open(lib.baseDir + dir + '/' + file + '.json', 'wx', (err, fileDescriptor) => {
     if (!err && fileDescriptor) {
-      // 3.2 Convert data to a string
+      // Convert data to a string
       const stringData = JSON.stringify(data);
-      // 3.3 Write to the file and close it
+      // Write to the file and close it
       fs.writeFile(fileDescriptor, stringData, (err) => {
         if (!err) {
-          // 3.4 Close the file
+          // Close the file
           fs.close(fileDescriptor, (err) => {
             if (!err) {
               callback(false);
             } else {
-              callback(`Error closing ${file}`);
+              callaback('Error closing new file');
             }
-          })
+          });
         } else {
-          callback(`Error writing to a ${file}`);
+          callback('Error writing to a new file');
         }
       });
     } else {
-      callback(`Could not create ${file}, it may already exists`);
+      callback('Could not create new file, it may already exists');
     }
   });
-};
-
+}
 // 4. Reading data from a file
 lib.read = (dir, file, callback) => {
-  fs.readFile(lib.baseDir = dir + '/' + file + '.json', 'utf-8', (err, data) => {
+  fs.readFile(lib.baseDir + dir + '/' + file + '.json', 'utf-8', (err, data) => {
     if (!err && data) {
       const parsedData = helpers.parseJsonToObject(data);
       callback(false, parsedData);
@@ -52,26 +50,23 @@ lib.read = (dir, file, callback) => {
     }
   });
 };
-
 // 5. Updating data in the file
 lib.update = (dir, file, data, callback) => {
-  // 5.1. Open the file for writing
+  // Open the file for writing
   fs.open(lib.baseDir + dir + '/' + file + '.json', 'r+', (err, fileDescriptor) => {
     if (!err && fileDescriptor) {
-      // 5.2 Stringify the data
       const stringData = JSON.stringify(data);
-      // 5.3 Truncate the contents of the file
+      // Truncate the contents of the file
       fs.ftruncate(fileDescriptor, (err) => {
         if (!err) {
-          // 5.4. Write to the file
+          // Write to the file and close it
           fs.writeFile(fileDescriptor, stringData, (err) => {
             if (!err) {
-              // 5.5. Close the file
               fs.close(fileDescriptor, (err) => {
                 if (!err) {
                   callback(false);
                 } else {
-                  callback(`Error closing the ${file}`);
+                  callback('Error closing the file');
                 }
               });
             } else {
@@ -79,42 +74,41 @@ lib.update = (dir, file, data, callback) => {
             }
           });
         } else {
-          callback(`Error truncationg the ${file}`);
+          callback('Error truncating file');
         }
       });
     } else {
-      callback(`Could not open the ${file} for updating, it may not exist yet`);
+      callback('Could not open the file for updating, it may not exist yet');
     }
   });
-};
-
+}
 // 6. Deleting data from a file/or a file
 lib.delete = (dir, file, callback) => {
-  // 6.1. Unlink the file from the system
+  // Unlinking the file
   fs.unlink(lib.baseDir + dir + '/' + file + '.json', (err) => {
     if (!err) {
       callback(false);
     } else {
-      callback(`Error deleting the ${file}`);
+      callback('Error deleting the file');
     }
   });
-};
+}
 
 // 7. List all the files in the directory
 lib.list = (dir, callback) => {
-  // 7.1 Read the file names
   fs.readdir(lib.baseDir + dir + '/', (err, data) => {
     if (!err && data && data.length > 0) {
-      // 7.2 Trim the file names
       let trimmedFileNames = [];
       data.forEach((fileName) => {
         trimmedFileNames.push(fileName.replace('.json', ''));
       });
+      callback(false, trimmedFileNames);
     } else {
       callback(err, data);
     }
   });
-};
+}
 
-// 8. Exporting the module
+
+// 8. Exporting
 module.exports = lib;

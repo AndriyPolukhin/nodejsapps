@@ -1,5 +1,5 @@
 /*
-* This are worker realted tasks
+* This are worker related task
 *
 */
 
@@ -11,45 +11,39 @@ const https = require('https');
 const http = require('http');
 const helpers = require('./helpers');
 const url = require('url');
+const _logs = require('./logs');
 
-// 2. Instantiate/create the workersObject
+// 2. Instantiate/create the workers object
 const workers = {};
 
-// 3. Loop
-// 3.1 Timer to execute the workers process once per minute
-workers.loop = () => {
-  setInterval(() => {
-    workers.getherAllChecks();
-  }, 1000 * 60);
-};
 
-// 4. Gather all Checms
-// @todo: gather all checks, get their data, send to a validator
+
+// 4. Gatherer ALL CHECKS
+// Look up all checks, get their data, send to a validator
 workers.gatherAllChecks = () => {
   // 4.1 Get all the checks that exist in the system
   _data.list('checks', (err, checks) => {
     if (!err && checks && checks.length > 0) {
-      // 4.2 Call Checks
+      // 4.2 Call checks
       checks.forEach((check) => {
-        // 4.2.1 Read in the check data
+        // 4.2.1. Read in the chekc data
         _data.read('checks', check, (err, originalCheckData) => {
           if (!err && originalCheckData) {
             // 4.2.2 Pass the data to the validator and let that function continue or log errors as needed
             workers.validateCheckData(originalCheckData);
           } else {
-            console.log(`Error reading one of the chek's data`);
+            console.log('Error reading one of the check\'s data');
           }
         });
       });
     } else {
-      console.log(`Error: Could not find any checks to process`);
+      console.log('Error: Could not find any checks to process');
     }
   });
-};
-
-// 5. Validate Check Data: Sanity-checking of the check-data
-workers.validateCehckData = (originalCheckData) => {
-  // 5.1 Validate the original check data types
+}
+// 5. Sanity-checking of the check-data
+workers.validateCheckData = (originalCheckData) => {
+  // 5.1. Validate the original Chck data
   originalCheckData = typeof (originalCheckData) == 'object' &&
     originalCheckData !== null ?
     originalCheckData : {};
@@ -60,14 +54,16 @@ workers.validateCehckData = (originalCheckData) => {
     originalCheckData.userPhone.trim().length == 10 ?
     originalCheckData.userPhone.trim() : false;
   originalCheckData.protocol = typeof (originalCheckData.protocol) == 'string' &&
-    ['http', 'https'].indexOf(originalCheckData.protocol) > -1 ? originalCheckData.protocol : false;
+    ['http', 'https'].indexOf(originalCheckData.protocol) > -1 ?
+    originalCheckData.protocol : false;
   originalCheckData.url = typeof (originalCheckData.url) == 'string' &&
     originalCheckData.url.trim().length > 0 ?
     originalCheckData.url.trim() : false;
   originalCheckData.method = typeof (originalCheckData.method) == 'string' &&
-    ['post', 'get', 'put', 'delete'].indexOf(originalCheckData.method) > - 1 ?
+    ['post', 'get', 'put', 'delete'].indexOf(originalCheckData.method) > -1 ?
     originalCheckData.method : false;
   originalCheckData.successCodes = typeof (originalCheckData.successCodes) == 'object' &&
+    originalCheckData.successCodes instanceof Array &&
     originalCheckData.successCodes.length > 0 ?
     originalCheckData.successCodes : false;
   originalCheckData.timeoutSeconds = typeof (originalCheckData.timeoutSeconds) == 'number' &&
@@ -76,14 +72,14 @@ workers.validateCehckData = (originalCheckData) => {
     originalCheckData.timeoutSeconds <= 5 ?
     originalCheckData.timeoutSeconds : false;
 
-  // 5.2 Set the keys that may not be set (if the workers never see this check before)
+  // 5.2 Set the keys that may not be set (if the workers never see this check befoer)
   originalCheckData.state = typeof (originalCheckData.state) == 'string' &&
     ['up', 'down'].indexOf(originalCheckData.state) > -1 ?
     originalCheckData.state : 'down';
   originalCheckData.lastChecked = typeof (originalCheckData.lastChecked) == 'number' &&
     originalCheckData.lastChecked > 0 ?
     originalCheckData.lastChecked : false;
-  // 5.3. If all the checks pass, then pass the data to the next function in the process
+  // 5.3 If all the chekc pass, then pass the data to the next process in the process
   if (
     originalCheckData.id &&
     originalCheckData.userPhone &&
@@ -93,9 +89,9 @@ workers.validateCehckData = (originalCheckData) => {
     originalCheckData.successCodes &&
     originalCheckData.timeoutSeconds) {
     // 5.4 Perform the check
-    workers.preformCheck(originalCheckData);
+    workers.performCheck(originalCheckData);
   } else {
-    console.log(`Error: One of the checks is not proerly formatted`);
+    console.log('Erorr: One of the checks is not properly formatted');
   };
 };
 
@@ -104,14 +100,14 @@ workers.performCheck = (originalCheckData) => {
   // 6.1 Prepare the initial check outcome
   let checkOutcome = {
     'error': false,
-    'reponseCode': false
+    'responseCode': false
   };
-  // 6.2 Mark that the outcome has not been sent yet
+  // 6.2. Mark that the outcome has not been sent yet
   let outcomeSent = false;
-  // 6.3. Parse the host name out of the originalCheckData(to know who is the one)
+  // 6.3 Parse the host name out of the originalCheckData ( to know who is the one)
   const parsedUrl = url.parse(originalCheckData.protocol + '://' + originalCheckData.url, true);
   const hostname = parsedUrl.hostname;
-  const path = parsedUrl.path; // using path, not the pathname(because we need the whole query string)
+  const path = parsedUrl.path; // Using path, not the pathname(because we need the whole query string)
 
   // 6.4 Construct the request
   const requestDetails = {
@@ -122,14 +118,14 @@ workers.performCheck = (originalCheckData) => {
     'timeout': originalCheckData.timeoutSeconds * 1000
   };
 
-  // 6.5 Instantiate/create the request object using http/https module
-  const _moduleToUse = originalCheckData.protocol == 'http' ? 'http' : 'https';
+  // 6.5. Instantiate/create the request object using http/https module
+  const _moduleToUse = originalCheckData.protocol == 'http' ? http : https;
   const req = _moduleToUse.request(requestDetails, (res) => {
-    // 6.5.1 Grab the status of the send request
+    // 6.5.1. Grab the status cf the send request
     const status = res.statusCode;
-    // 6.5.2 Update the checkOutcome and pass the data along
+    // 6.5.2. Update the checkOutcome and pass the data along
     checkOutcome.responseCode = status;
-    if (!outcomeSend) {
+    if (!outcomeSent) {
       workers.processCheckOutcome(originalCheckData, checkOutcome);
       outcomeSent = true;
     }
@@ -147,9 +143,9 @@ workers.performCheck = (originalCheckData) => {
     }
   });
 
-  // 6.7 Bind to the timeour event
+  // 6.7 Bind to the timeout event
   req.on('timeout', (e) => {
-    // 6.7.1 Update the checkout and pass the data along
+    // 6.7.1 Update he checkout na pass the data along
     checkOutcome.error = {
       'error': true,
       'value': 'timeout'
@@ -159,35 +155,46 @@ workers.performCheck = (originalCheckData) => {
       outcomeSent = true;
     }
   });
+
   // 6.8 End the request
   req.end();
 };
 
-// 7. Process Cehck outcome and update the check data as needed and trigger the alert to the user if needed
+// 7. Process Check Outcome and update the check data as needed and trigger the alert to the user if needed
 // Special logic for accomodating a check that never been tested before
 workers.processCheckOutcome = (originalCheckData, checkOutcome) => {
-  // 7.1 Decide if the check is considersed up/down in this current state
+  // 7.1 Decide if the check is considered up/donw in this current state
   const state = !checkOutcome.error &&
     checkOutcome.responseCode &&
     originalCheckData.successCodes.indexOf(checkOutcome.responseCode) > -1 ? 'up' : 'down';
-  // 7.2 Decide if the alert is warraned
+  // 7.2 Decide if the alert is warranted
   const alertWarranted = originalCheckData.lastChecked &&
     originalCheckData.state !== state ? true : false;
+
+  // @todo: testing
+  // 1. Log the outcome of the log:
+  const timeOfCheck = Date.now();
+  workers.log(originalCheckData, checkOutcome, state, alertWarranted, timeOfCheck);
+
+
   // 7.3 Update the check data
   const newCheckData = originalCheckData;
   newCheckData.state = state;
-  newCheckData.lastChecked = Date.now();
-  // 74. Save the updates to dist
+  newCheckData.lastChecked = timeOfCheck;
+
+
+
+  // 7.4 Save the updates to disk
   _data.update('checks', newCheckData.id, newCheckData, (err) => {
     if (!err) {
-      // 7.4.1 Send the new check data to the next phase in the process if needed
+      // 7.4.1. Send the new check data to the next phase in the process if needed
       if (alertWarranted) {
         workers.alertUserToStatusChange(newCheckData);
       } else {
-        console.log(`Check outcome has not changed, not alert needed`);
+        console.log('Check outcome has not changed, no alert needed');
       }
     } else {
-      console.log(`Error trying to save updates to one of the cehcks`);
+      console.log('Error trying to save udpates to one of the checks');
     }
   });
 };
@@ -197,12 +204,83 @@ workers.alertUserToStatusChange = (newCheckData) => {
   const msg = `Alert: Your check for ${newCheckData.method.toUpperCase()} ${newCheckData.protocol}://${newCheckData.url} is currently ${newCheckData.state}`;
   helpers.sendTwilioSms(newCheckData.userPhone, msg, (err, callback) => {
     if (!err) {
-      console.log(`Success: User was alerted to a status change in their check, via sms: ${msg}`);
+      console.log('Success: User was alerted to a status change in their check, via sms:', msg);
     } else {
-      console.log(`Error: Could not sent sms alert to user who head a status change in their check`);
+      console.log('Error: Could not send sms alert to user who head a status cahnge in their check');
     }
   });
 };
+
+// 2. WORKER FILE TO LOG THE DATA TO A FILE
+workers.log = (originalCheckData, checkOutcome, state, alertWarranted, timeOfCheck) => {
+  // 2.1 Form the log data
+  const logData = {
+    'check': originalCheckData,
+    'outcome': checkOutcome,
+    'state': state,
+    'alert': alertWarranted,
+    'time': timeOfCheck
+  };
+  // 2.2 COnvert to a string
+  const logString = JSON.stringify(logData);
+  // 2.3 Determine the name of the log file
+  const logFileName = originalCheckData.id;
+  // 2.4 Append the log string to the file
+  _logs.append(logFileName, logString, (err) => {
+    if (!err) {
+      console.log(`Logging to file succedded`);
+    } else {
+      console.log(`Loggin to file failed`);
+    }
+  });
+};
+
+// 3. Loop
+// 3.1 Timer to execute the worker process once per minute
+workers.loop = () => {
+  setInterval(() => {
+    workers.gatherAllChecks();
+  }, 1000 * 60);
+};
+
+// To rotate/compress the logs files
+workers.rotateLogs = () => {
+  // List all the non-compressed log files
+  _logs.list(false, (err, logs) => {
+    if (!err && logs && logs.length > 0) {
+      // Loop
+      logs.forEach((logName) => {
+        // Compress the data to a different file
+        const logId = logName.replace('.log', '');
+        const newFileId = logId + '-' + Date.now();
+        _logs.compress(logId, newFileId, (err) => {
+          if (!err) {
+            // Truncate the log
+            _logs.truncate(logId, (err) => {
+              if (!err) {
+                console.log('Success Truncating the log file');
+              } else {
+                console.log('Error truncating the log file');
+              }
+            });
+          } else {
+            console.log('Error: Compressing one of the files', err);
+          }
+        });
+      });
+    } else {
+      console.log('Error: Could not find any logs to rotate');
+    }
+  });
+};
+
+// Timer to execute the log-rotation process once per-day
+workers.logRotationLoop = () => {
+  setInterval(() => {
+    workers.rotateLogs();
+  }, 1000 * 60 * 60 * 24);
+};
+
 
 // 9. Init Script
 workers.init = () => {
@@ -210,7 +288,11 @@ workers.init = () => {
   workers.gatherAllChecks();
   // 9.2 Call a loop so the checks would continue to execute on their own
   workers.loop();
+  // 9.3 Compress all the logs immediately
+  workers.rotateLogs();
+  // 9.4 Call the compression loop, so logs will be compressed later on
+  workers.logRotationLoop();
 };
 
-// 10. Export the workes
+// 10. Export the workers
 module.exports = workers;
