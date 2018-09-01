@@ -57,12 +57,12 @@ helpers.createRandomString = (strLength) => {
 // 6. Send on SMS message via Twilio
 helpers.sendTwilioSms = (phone, msg, callback) => {
   // 6.1 Validate the parameters
-  phone = typeof (phone) == 'stirng' &&
+  phone = typeof (phone) == 'string' &&
     phone.trim().length == 10 ?
     phone.trim() : false;
   msg = typeof (msg) == 'string' &&
     msg.trim().length > 0 &&
-    msg..trim().length <= 1600 ?
+    msg.trim().length <= 1600 ?
     msg.trim() : false;
   if (phone && msg) {
     // 6.2 Configure the request payload
@@ -85,7 +85,7 @@ helpers.sendTwilioSms = (phone, msg, callback) => {
         ':' + config.twilio.authToken,
       'headers': {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': Buffer.byteLength(stringPayload);
+        'Content-Length': Buffer.byteLength(stringPayload)
       }
     };
     // 6.5 Intantiate/Create the request object
@@ -116,4 +116,4 @@ helpers.sendTwilioSms = (phone, msg, callback) => {
 
 
 // Export
-module.export = helpers;
+module.exports = helpers;

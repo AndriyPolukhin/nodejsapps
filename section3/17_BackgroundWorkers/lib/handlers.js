@@ -257,8 +257,7 @@ handlers._users.delete = (data, callback) => {
             } else {
                 callback(403, { 'Error': 'Missing required token in header, or token is expired ' });
             }
-        })
-
+        });
     } else {
         callback(400, { 'Error': 'Missing required filed' });
     }
@@ -565,7 +564,7 @@ handlers._checks.get = (data, callback) => {
             } else {
                 callback(404);
             }
-        })
+        });
 
     } else {
         callback(400, { 'Error': 'Missing required field' });

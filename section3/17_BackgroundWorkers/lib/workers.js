@@ -213,5 +213,5 @@ workers.init = () => {
   workers.loop();
 };
 
-// Export the workers
+// 10. Export the workers
 module.exports = workers;

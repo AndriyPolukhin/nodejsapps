@@ -16,7 +16,7 @@ lib.baseDir = path.join(__dirname, '/../.data/');
 // 3. Writing data to a file
 lib.create = (dir, file, data, callback) => {
   // 3.1 Open the file for writing/creat a file
-  fs.open(lib.baseDir + dir + '/' + file + '.json', 'wx', (err, fileDescriptor) {
+  fs.open(lib.baseDir + dir + '/' + file + '.json', 'wx', (err, fileDescriptor) => {
     if (!err && fileDescriptor) {
       // 3.2 Convert data to a string
       const stringData = JSON.stringify(data);
