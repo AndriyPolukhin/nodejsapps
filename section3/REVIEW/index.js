@@ -7,9 +7,13 @@
 const http = require('http');
 const https = require('https');
 const url = require('url');
+
 const StringDecoder = require('string_decoder').StringDecoder;
-const config = require('./config');
 const fs = require('fs');
+
+const config = require('./lib/config');
+const handlers = require('./lib/handlers');
+const helpers = require('./lib/helpers');
 
 // 2.1 Http Server
 const httpServer = http.createServer((req, res) => {
@@ -17,7 +21,7 @@ const httpServer = http.createServer((req, res) => {
 });
 
 httpServer.listen(config.httpPort, () => {
-  console.log(`Server is running on port: ${config.httpPort} in ${config.envName} mode`);
+  console.log('\x1b[32m%s\x1b[0m', `Server is running on port: ${config.httpPort} in ${config.envName} mode`);
 });
 
 // 2.2 Https Server
@@ -30,7 +34,7 @@ const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
 });
 
 httpsServer.listen(config.httpsPort, () => {
-  console.log(`Server running on port: ${config.httpsPort} in ${config.envName} mode`);
+  console.log('\x1b[33m%s\x1b[0m', `Server running on port: ${config.httpsPort} in ${config.envName} mode`);
 })
 
 
@@ -46,7 +50,7 @@ const unifiedServer = (req, res) => {
   // 2.4 Query String as an object
   const queryStringObject = parsedUrl.query;
   // 2.5 Get the headres as an object
-  const headers = req.headres;
+  const headers = req.headers;
   // 2.6 Get the paylaod if there is any
   const decoder = new StringDecoder('utf-8');
   let buffer = '';
@@ -68,7 +72,7 @@ const unifiedServer = (req, res) => {
       'queryStringObject': queryStringObject,
       'method': method,
       'headers': headers,
-      'payload': buffer
+      'payload': helpers.parseJsonToObject(buffer)
     };
     // Route the request to the handler specified in the router
     chosenHandler(data, (statusCode, payload) => {
@@ -82,26 +86,15 @@ const unifiedServer = (req, res) => {
       res.setHeader('Content-Type', 'application/json');
       res.writeHead(statusCode);
       res.end(payloadString);
-      console.log(`Returning this response: ${statusCode} ${payloadString}`);
+      console.log('\x1b[36m%s\x1b[0m', `Returning this response: ${statusCode} ${payloadString}`);
     });
   });
 };
 
-// 5. Handlers
-const handlers = {};
 
-// 5.1 Sample handlers
-handlers.sample = (data, callback) => {
-  // Callback http status code, and a payload object
-  callback(406, { 'name': 'sample handler' });
-};
-
-// 5.2 Not found handlers
-handlers.notFound = (data, callback) => {
-  callback(404);
-};
 
 // 6. Request router
 const router = {
-  'sample': handlers.sample
+  'ping': handlers.ping,
+  'users': handlers.users
 };

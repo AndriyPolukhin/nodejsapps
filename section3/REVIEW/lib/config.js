@@ -10,13 +10,15 @@ const environments = {};
 environments.staging = {
   'httpPort': 3000,
   'httpsPort': 3001,
-  'envName': 'staging'
+  'envName': 'staging',
+  'hashingSecret': 'ThisIsASecret'
 };
 // 3. Production environment
 environments.production = {
   'httpsPort': 5000,
   'httpsPort': 5001,
-  'envName': 'production'
+  'envName': 'production',
+  'hashingSecret': 'ThisIsASecret'
 };
 
 // 4. Determine which environment should be pushed as a command-line arg
