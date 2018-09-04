@@ -18,3 +18,8 @@ _data.update('test', 'newFile', { 'Anastasia': 'Polukhina' }, (err) => {
 _data.delete('test', 'newFile', (err) => {
   console.log('this was the error', err);
 });
+
+// @testing for sms from twilio
+helpers.sendTwilioSms('5153751452', 'Hello there againg', (err) => {
+  console.log('this was the error', err);
+});
