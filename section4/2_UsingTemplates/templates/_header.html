@@ -1,0 +1,38 @@
+<html>
+
+<head>
+  <!-- GENERAL SETTINGS -->
+  <meta charest="utf-8">
+  <meta http-equiv="content-language" content="en-us">
+  <base href="{global.baseUrl}" />
+  <!-- Meta TAGS-->
+  <title>{head.title} | {global.appName}</title>
+  <meta name="description" content="{head.description}">
+
+  <!-- LIST THE STATIS ASSETS-->
+  <link type="image/x-icon" rel="icon" href="favicon.ico">
+  <script type="text/javascript" charset="utf-8" src="public/app.js"></script>
+  <link rel="stylesheet" type="text/css" href="public/app.css" />
+</head>
+
+<body class="{body.class}">
+
+  <!-- PAGE WRAPPERS-->
+  <div class=" wrapper ">
+    <!-- HEADER-->
+    <div class="header ">
+      <!-- LOGO-->
+      <a class="logo" href="/"></a>
+      <!-- NAVIGATION-->
+      <ul class="menu">
+        <li><a href="/">Home</a></li>
+        <li><a class="loggedOut" href="/">Signup</a></li>
+        <li><a class="loggedOut" href="/">Login</a></li>
+        <li><a class="loggedIn" href="/">Dashboard</a></li>
+        <li><a class="loggedIn" href="/">Account Settings</a></li>
+        <li><a class="loggedIn" href="/">Logout</a></li>
+      </ul>
+
+    </div>
+    <!-- PAGE-specific content -->
+    <div class="content ">
