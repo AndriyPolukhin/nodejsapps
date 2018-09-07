@@ -197,7 +197,7 @@ workers.processCheckOutcome = (originalCheckData, checkOutcome) => {
 // 8. Alert User to Status Change
 workers.alertUserToStatusChange = (newCheckData) => {
   const msg = `Alert: Your check for ${newCheckData.method.toUpperCase()} ${newCheckData.protocol}://${newCheckData.url} is currently ${newCheckData.state}`;
-  helpers.sendTwilioSms(newCheckData.userPhone, msg, (err, callback) => {
+  helpers.sendTwilioSms(newCheckData.userPhone, msg, (err) => {
     if (!err) {
       console.log('Success: User was alerted to a status change in their check, via sms:', msg);
     } else {
