@@ -119,7 +119,64 @@ handlers.sessionCreate = (data, callback) => {
   }
 }
 
+// 4. DELETED SESSION HANDLER
+handlers.sessionDeleted = (data, callback) => {
+  // 4.1 Reject any request that isn't a get
+  if (data.method == 'get') {
+    // 4.2 Prepare the data for interpolation
+    let templateData = {
+      'head.title': 'Logged Out',
+      'head.description': 'You have been logged out of your account',
+      'body.class': 'sessionDeleted'
+    };
+    // 4.3 Read in a template as a string
+    helpers.getTemplate('sessionDeleted', templateData, (err, str) => {
+      if (!err && str) {
+        //Add the universal header and footer
+        helpers.addUniversalTemplates(str, templateData, (err, str) => {
+          if (!err && str) {
+            callback(200, str, 'html');
+          } else {
+            callback(500, undefined, 'html');
+          }
+        });
+      } else {
+        callback(500, undefined, 'html');
+      }
+    });
+  } else {
+    callback(405, undefined, 'html');
+  }
+}
 
+// 5. EDIT ACCOUNT HANDLER
+handlers.accountEdit = (data, callback) => {
+  // 5.1 Reject all that is not a get
+  if (data.method == 'get') {
+    // 5.2 Prepare the data for interpolation
+    let templateData = {
+      'head.title': 'Account Settings',
+      'body.class': 'accountEdit'
+    };
+    // 5.3 Get the template
+    helpers.getTemplate('accountEdit', templateData, (err, str) => {
+      if (!err && str) {
+        // 5.4 Add the univeresal header and footer
+        helpers.addUniversalTemplates(str, templateData, (err, str) => {
+          if (!err && str) {
+            callback(200, str, 'html');
+          } else {
+            callback(500, undefined, 'html');
+          }
+        });
+      } else {
+        callback(500, undefined, 'html');
+      }
+    });
+  } else {
+    callback(405, undefined, 'html');
+  }
+}
 
 
 /*
@@ -313,7 +370,7 @@ handlers._users.put = (data, callback) => {
   // 3.4.2 Check for the optional fields
   const firstName = typeof (data.payload.firstName) == 'string' &&
     data.payload.firstName.trim().length > 0 ?
-    data.payload.firtsName.trim() : false;
+    data.payload.firstName.trim() : false;
   const lastName = typeof (data.payload.lastName) == 'string' &&
     data.payload.lastName.trim().length > 0 ?
     data.payload.lastName.trim() : false;
