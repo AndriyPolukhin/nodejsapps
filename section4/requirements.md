@@ -20,3 +20,8 @@
 ## ADDINT new routes to the router to server html
 ## Create HTML Templates for new pages
 ## frontend JS to capture inputs and submit them to the API via AJAX
+
+
+## Copy all the files from one directory to another
+cp -R 4.1_AjaxRequests/. 5_IndexPage
+cp -R t1/. t2

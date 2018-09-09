@@ -33,9 +33,8 @@ handlers.index = (data, callback) => {
   if (data.method == 'get') {
     // 1.2 Prepare the data for interpolation
     let templateData = {
-      'head.title': 'This is the Title',
-      'head.description': 'This is the meta description',
-      'body.title': 'Hello templated world!',
+      'head.title': 'Uptime MOnitoring  - Made Simple',
+      'head.description': 'We offer free, simple uptime monitoring for HTTP/HTTPS sites of all kinds. When your site goes down, we\'ll send you a text to let you know',
       'body.class': 'index'
     }
 
@@ -60,6 +59,41 @@ handlers.index = (data, callback) => {
   }
 }
 
+// 2. CREATE ACCOUNT HANDLER
+handlers.accountCreate = (data, callback) => {
+  // 2.1 Reject all the request that isn't a GET
+  if (data.method == 'get') {
+    // 2.2 Prepare data for interpolation
+    let templateData = {
+      'head.title': 'Create an Account',
+      'head.description': 'Signup is easy and only takes a few seconds',
+      'body.class': 'accountCreate'
+    };
+    // 2.3 Read in a template as a string
+    helpers.getTemplate('accountCreate', templateData, (err, str) => {
+      if (!err && str) {
+        // 2.4 Add the universal header and footer
+        helpers.addUniversalTemplates(str, templateData, (err, str) => {
+          if (!err && str) {
+            callback(200, str, 'html');
+          } else {
+            callback(500, undefined, 'html');
+          }
+        });
+      } else {
+        callback(500, undefined, 'html');
+      }
+    });
+  } else {
+    callback(405, undefined, 'html');
+  }
+}
+
+
+/*
+*  II. STATIC ASSETS HANDLERS
+*
+*/
 
 // 2. Favicon handlers
 handlers.favicon = (data, callback) => {
@@ -74,12 +108,11 @@ handlers.favicon = (data, callback) => {
       } else {
         callback(500);
       }
-    })
+    });
   } else {
     callback(405);
   }
 }
-
 
 // 3. Public Assets
 handlers.public = (data, callback) => {
@@ -126,7 +159,7 @@ handlers.public = (data, callback) => {
 }
 
 /*
-*  II. JSON API HANDLERS
+*  III. JSON API HANDLERS
 *
 */
 

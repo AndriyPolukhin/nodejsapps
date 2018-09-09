@@ -83,7 +83,7 @@ server.unifiedServer = (req, res) => {
     chosenHandler(data, (statusCode, payload, contentType) => {
 
       // Determine the type of response (default to JSON)
-      constentType = typeof (contentType) == 'string' ? contentType : 'json';
+      contentType = typeof (contentType) == 'string' ? contentType : 'json';
 
       // Default status code
       statusCode = typeof (statusCode) == 'number' ? statusCode : 200;

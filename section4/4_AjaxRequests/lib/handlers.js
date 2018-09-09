@@ -98,6 +98,9 @@ handlers.public = (data, callback) => {
           if (trimmedAssetName.indexOf('.css') > -1) {
             contentType = 'css';
           }
+          if (trimmedAssetName.indexOf('.js') > -1) {
+            contentType = 'js';
+          }
           if (trimmedAssetName.indexOf('.png') > -1) {
             contentType = 'png';
           }
@@ -106,9 +109,6 @@ handlers.public = (data, callback) => {
           }
           if (trimmedAssetName.indexOf('.ico') > -1) {
             contentType = 'favicon';
-          }
-          if (trimmedAssetName.indexOf('.js') > -1) {
-            contentType = 'js';
           }
 
           // 3.6 Callback the data
