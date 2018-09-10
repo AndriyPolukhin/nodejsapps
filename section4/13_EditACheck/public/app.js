@@ -157,7 +157,11 @@ app.bindForms = function () {
               if (nameOfElement == 'httpmethod') {
                 nameOfElement = 'method';
               }
-              // 4.3.4 If the element has the class "multiselect" add this value(s) as array elements
+              // 4.3.4 Create an paylaod field named "id" if the elements name is actually uid
+              if (nameOfElement == 'uid') {
+                nameOfElement = 'id';
+              }
+              // 4.3.5 If the element has the class "multiselect" add this value(s) as array elements
               if (classOfElement.indexOf('multiselect') > -1) {
                 if (elementIsChecked) {
                   payload[nameOfElement] = typeof (payload[nameOfElement]) == 'object' && payload[nameOfElement] instanceof Array ? payload[nameOfElement] : [];
@@ -250,6 +254,11 @@ app.formResponseProcessor = (formId, requestPayload, responsePayload) => {
 
   // 5.11 If the user just created a new check successfully, redirect back to the dashboard
   if (formId == 'checksCreate') {
+    window.location = '/checks/all';
+  }
+
+  // 5.12 If the user just deleted a check, redirect them to the dashboard
+  if (formId == 'checksEdit2') {
     window.location = '/checks/all';
   }
 };
@@ -345,6 +354,11 @@ app.loadDataOnPage = () => {
   if (primaryClass == 'checksList') {
     app.loadChecksListPage();
   }
+
+  // 10.4 Logic for check details page
+  if (primaryClass == 'checksEdit') {
+    app.loadChecksEditPage();
+  }
 };
 
 // 11. Load the account edit page specifically
@@ -429,20 +443,61 @@ app.loadChecksListPage = () => {
             document.getElementById("createCheckCTA").style.display = 'block';
           }
         } else {
-          // Show 'you have no checks' message
+          // 12.7 Show 'you have no checks' message
           document.getElementById("noChecksMessage").style.display = 'table-row';
 
-          // Show the createCheck CTA
+          // 12.8 Show the createCheck CTA
           document.getElementById("createCheckCTA").style.display = 'block';
 
         }
       } else {
-        // If the request comes back as something other than 200, log the user our (on the assumption that the api is temporarily down or the users token is bad)
+        // 12.9 If the request comes back as something other than 200, log the user our (on the assumption that the api is temporarily down or the users token is bad)
         app.logUserOut();
       }
     });
   } else {
     app.logUserOut();
+  }
+};
+
+
+// 13. Load the checks edit page specifically
+app.loadChecksEditPage = () => {
+  // 13.1 Get the checks id from the query string, if none is found then redirect back to dashboard
+  const id = typeof (window.location.href.split('=')[1]) == 'string' && window.location.href.split('=')[1].length > 0 ? window.location.href.split('=')[1] : false;
+  if (id) {
+    // 13.2 Fetch the check data
+    let queryStringObject = {
+      'id': id
+    };
+    app.client.request(undefined, 'api/checks', 'GET', queryStringObject, undefined, (statusCode, responsePayload) => {
+      if (statusCode == 200) {
+        // 13.3 Put the hidden id field into both forms
+        let hiddenIdInputs = document.querySelectorAll("input.hiddenIdInput");
+        for (let i = 0; i < hiddenIdInputs.length; i++) {
+          hiddenIdInputs[i].value = responsePayload.id;
+        }
+
+        // 13.4 Put the data into the top form as values where needed
+        document.querySelector("#checksEdit1 .displayIdInput").value = responsePayload.id;
+        document.querySelector("#checksEdit1 .displayStateInput").value = responsePayload.state;
+        document.querySelector("#checksEdit1 .protocolInput").value = responsePayload.protocol;
+        document.querySelector("#checksEdit1 .urlInput").value = responsePayload.url;
+        document.querySelector("#checksEdit1 .methodInput").value = responsePayload.method;
+        document.querySelector("#checksEdit1 .timeoutInput").value = responsePayload.timeoutSeconds;
+        const successCodeCheckboxes = document.querySelectorAll("#checksEdit1 input.successCodesInput");
+        for (let i = 0; i < successCodeCheckboxes.length; i++) {
+          if (responsePayload.successCodes.indexOf(parseInt(successCodeCheckboxes[i].value)) > -1) {
+            successCodeCheckboxes[i].checked = true;
+          }
+        }
+      } else {
+        // if the request comes back as something other than 200, redirect back to dashboard
+        window.location = '/checks/all';
+      }
+    });
+  } else {
+    window.location = '/checks/all';
   }
 };
 

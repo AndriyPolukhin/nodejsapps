@@ -268,6 +268,37 @@ handlers.checksList = (data, callback) => {
     }
 }
 
+// 9. EDIT THE CHECKS
+handlers.checksEdit = (data, callback) => {
+    // 9.1 Reject all request that isn't a GET
+    if (data.method == 'get') {
+        // 9.2 Prepare the data for interpolation
+        let templateData = {
+            'head.title': 'Checks Details',
+            'body.class': 'checksEdit'
+        };
+        // 9.3 Read in a tempalate as a string
+        helpers.getTemplate('checksEdit', templateData, (err, str) => {
+            if (!err && str) {
+                // 9.4 Add the universal header and footer
+                helpers.addUniversalTemplates(str, templateData, (err, str) => {
+                    if (!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        callback(500, undefined, 'html');
+                    }
+                })
+            } else {
+                callback(500, undefined, 'html');
+            }
+        })
+    } else {
+        callback(405, undefined, 'html');
+    }
+}
+
+
+
 /*
 *  II. STATIC ASSETS HANDLERS
 *

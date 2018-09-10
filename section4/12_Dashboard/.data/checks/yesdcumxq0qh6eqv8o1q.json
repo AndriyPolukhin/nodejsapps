@@ -1,16 +1,1 @@
-{
-  "id": "yesdcumxq0qh6eqv8o1q",
-  "userPhone": "0933570119",
-  "protocol": "http",
-  "url": "twitter.com",
-  "method": "put",
-  "successCodes": [
-    200,
-    201,
-    301,
-    302
-  ],
-  "timeoutSeconds": 3,
-  "state": "up",
-  "lastChecked": 1536594528859
-}
+{"id":"yesdcumxq0qh6eqv8o1q","userPhone":"0933570119","protocol":"http","url":"twitter.com","method":"put","successCodes":[200,201,301,302],"timeoutSeconds":3,"state":"up","lastChecked":1536599514087}
