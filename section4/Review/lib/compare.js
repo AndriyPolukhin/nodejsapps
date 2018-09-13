@@ -1,113 +1,50 @@
 /*
-* ROUTE REQUEST HANDLERS
+* This are the Request handlers
 *
 */
 
-// 1. MAIN DEPENDENCIES
+// 1. Dependencies
 const _data = require('./data');
 const helpers = require('./helpers');
 const config = require('./config');
 
-// 2. CONTAINER: for the handlers
+// 2. Handlers Container
 const handlers = {};
 
-/*
-*  I. HELPERS HANDLERS
-*
-*/
-
-// 1. PING
+// COMMON HELPERS:
+// 2.1 Ping handlers
 handlers.ping = (data, callback) => {
   callback(200);
 };
-// 2. NOT FOUND
+
+// 2.2 Not found handlers
 handlers.notFound = (data, callback) => {
   callback(404);
 };
 
 /*
-* II. HTML DATA API HANDLERS
+*  I. HTML API HANDLERS
 *
 */
 
-// 1. INDEX PAGE HANDLER
+// 1. INDEX HANDLERS
 handlers.index = (data, callback) => {
-  // 1.1 REJECT REQUEST: all but the GET
+  // 1.1  Reject any request that is not a GET
   if (data.method == 'get') {
-    // 1.2 Prepare data for interpolation
-    const templateData = {
-      'head.title': 'Uptime Monitoring - Made Simpe',
+    // 1.2 Prepare the data for interpolation
+    let templateData = {
+      'head.title': 'Uptime MOnitoring  - Made Simple',
       'head.description': 'We offer free, simple uptime monitoring for HTTP/HTTPS sites of all kinds. When your site goes down, we\'ll send you a text to let you know',
       'body.class': 'index'
-    };
-    // 1.3 Make template into a string
+    }
+
+    // 1.3 Read in the template as a string
     helpers.getTemplate('index', templateData, (err, str) => {
       if (!err && str) {
-        // 1.4 Add Universal haeder and footer
+        // 1.4 Add the universal header and footer
         helpers.addUniversalTemplates(str, templateData, (err, str) => {
           if (!err && str) {
-            // 1.5 Return the html page as requested
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-  } else {
-    callback(405, undefined, 'html');
-  }
-};
-// 2. ACCOUNT CREATE HANDLER
-handlers.accountCreate = (data, callback) => {
-  // 2.1 REJECT REQUEST: all but the GET
-  if (data.method == 'get') {
-    // 2.2 Prepare data for interpolation
-    const templateData = {
-      'head.title': 'Create an Account',
-      'head.description': 'Signup is easy and only takes a few seconds',
-      'body.class': 'accountCreate'
-    };
-    // 2.3 Make template into a string
-    helpers.getTemplate('accountCreate', templateData, (err, str) => {
-      if (!err && str) {
-        //2.4 Add Universal haeder and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            // 2.5 Return the html page as requested
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-  } else {
-    callback(405, undefined, 'html');
-  }
-};
-
-// 3. SESSION CREATE HANDLER
-helpers.sessionCreate = (data, callback) => {
-  // 3.1 REJECT REQUEST: all but the GET
-  if (data.method == 'get') {
-    // 3.2 Prepare data for interpolation
-    const templateData = {
-      'head.title': 'Login to your Account',
-      'head.description': 'Please enter your phone and password to access your account',
-      'body.class': 'sessionCreate'
-    };
-    // 3.3 Make template into a string
-    helpers.getTemplate('sessionCreate', templateData, (err, str) => {
-      if (!err && str) {
-        // 3.4 Add Universal haeder and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            // 3.5 Return the html page as requested
+            // 1.5 Return the page as html
             callback(200, str, 'html');
           } else {
             callback(500, undefined, 'html');
@@ -121,23 +58,142 @@ helpers.sessionCreate = (data, callback) => {
     callback(405, undefined, 'html');
   }
 }
-// 4. SESSION DELETE HANDLER
-handlers.sessionDeleted = (data, callback) => {
-  // 4.1 REJECT REQUEST: all but the GET
+
+// 2. CREATE ACCOUNT HANDLER
+handlers.accountCreate = (data, callback) => {
+  // 2.1 Reject all the request that isn't a GET
   if (data.method == 'get') {
-    // 4.2 Prepare data for interpolation
-    const templateData = {
-      'head.title': 'Logged Out',
-      'head.description': 'You have been logged out out of your account',
-      'body.class': 'sessionDeleted'
+    // 2.2 Prepare data for interpolation
+    let templateData = {
+      'head.title': 'Create an Account',
+      'head.description': 'Signup is easy and only takes a few seconds',
+      'body.class': 'accountCreate'
     };
-    // 4.3 Make template into a string
-    helpers.getTemplate('sessionDeleted', templateData, (err, str) => {
+    // 2.3 Read in a template as a string
+    helpers.getTemplate('accountCreate', templateData, (err, str) => {
       if (!err && str) {
-        // 4.4 Add Universal haeder and footer
+        // 2.4 Add the universal header and footer
         helpers.addUniversalTemplates(str, templateData, (err, str) => {
           if (!err && str) {
-            // 4.5 Return the html page as requested
+            callback(200, str, 'html');
+          } else {
+            callback(500, undefined, 'html');
+          }
+        });
+      } else {
+        callback(500, undefined, 'html');
+      }
+    });
+  } else {
+    callback(405, undefined, 'html');
+  }
+}
+
+// 3. CREATE SESSION HANDLER
+handlers.sessionCreate = (data, callback) => {
+  // 3.1 Reject all the request that isn't a GET
+  if (data.method == 'get') {
+    // 3.2 Prepare data for interpolation
+    let templateData = {
+      'head.title': 'Login to your Account',
+      'head.description': 'Please enter your phone number and password to access your account',
+      'body.class': 'sessionCreate'
+    };
+    // 3.3 Read in a template as a string
+    helpers.getTemplate('sessionCreate', templateData, (err, str) => {
+      if (!err && str) {
+        // 3.4 Add the universal header and footer
+        helpers.addUniversalTemplates(str, templateData, (err, str) => {
+          if (!err && str) {
+            callback(200, str, 'html');
+          } else {
+            callback(500, undefined, 'html');
+          }
+        });
+      } else {
+        callback(500, undefined, 'html');
+      }
+    });
+  } else {
+    callback(405, undefined, 'html');
+  }
+}
+
+// 4. DELETED SESSION HANDLER
+handlers.sessionDeleted = (data, callback) => {
+  // 4.1 Reject any request that isn't a get
+  if (data.method == 'get') {
+    // 4.2 Prepare the data for interpolation
+    let templateData = {
+      'head.title': 'Logged Out',
+      'head.description': 'You have been logged out of your account',
+      'body.class': 'sessionDeleted'
+    };
+    // 4.3 Read in a template as a string
+    helpers.getTemplate('sessionDeleted', templateData, (err, str) => {
+      if (!err && str) {
+        //Add the universal header and footer
+        helpers.addUniversalTemplates(str, templateData, (err, str) => {
+          if (!err && str) {
+            callback(200, str, 'html');
+          } else {
+            callback(500, undefined, 'html');
+          }
+        });
+      } else {
+        callback(500, undefined, 'html');
+      }
+    });
+  } else {
+    callback(405, undefined, 'html');
+  }
+}
+
+// 5. EDIT ACCOUNT HANDLER
+handlers.accountEdit = (data, callback) => {
+  // 5.1 Reject all that is not a get
+  if (data.method == 'get') {
+    // 5.2 Prepare the data for interpolation
+    let templateData = {
+      'head.title': 'Account Settings',
+      'body.class': 'accountEdit'
+    };
+    // 5.3 Get the template
+    helpers.getTemplate('accountEdit', templateData, (err, str) => {
+      if (!err && str) {
+        // 5.4 Add the univeresal header and footer
+        helpers.addUniversalTemplates(str, templateData, (err, str) => {
+          if (!err && str) {
+            callback(200, str, 'html');
+          } else {
+            callback(500, undefined, 'html');
+          }
+        });
+      } else {
+        callback(500, undefined, 'html');
+      }
+    });
+  } else {
+    callback(405, undefined, 'html');
+  }
+}
+
+// 6. DELETE ACCOUNT HANDLER
+handlers.accountDeleted = (data, callback) => {
+  // 6.1 Reject All methods that aren't get
+  if (data.method == 'get') {
+    // 6.2 Prepare the data for interpolation
+    const templateData = {
+      'head.title': 'Account Deleted',
+      'head.description': 'Your account has been deleted.',
+      'body.class': 'accountDeleted'
+    };
+    // 6.3 Read in a template as a string
+    helpers.getTemplate('accountDeleted', templateData, (err, str) => {
+      if (!err && str) {
+        // 6.4 Add the universal header and footer
+        helpers.addUniversalTemplates(str, templateData, (err, str) => {
+          if (!err && str) {
             callback(200, str, 'html');
           } else {
             callback(500, undefined, 'html');
@@ -152,81 +208,21 @@ handlers.sessionDeleted = (data, callback) => {
   }
 };
 
-// 5. ACCOUNT EDIT HANDLER
-handlers.accountEdit = (data, callback) => {
-  // 5.1 REJECT REQUEST: all but the GET
-  if (data.method == 'get') {
-    // 5.2 Prepare data for interpolation
-    const templateData = {
-      'head.title': 'Account Settings',
-      'body.class': 'accountEdit'
-    };
-    // 5.3 Make template into a string
-    helpers.getTemplate('accountEdit', templateData, (err, str) => {
-      if (!err && str) {
-        // 5.4 Add Universal haeder and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            // 5.5 Return the html page as requested
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-  } else {
-    callback(405, undefined, 'html');
-  }
-};
-// 6. ACCOUNT DELETE HANDLER
-handlers.accountDeleted = (data, callback) => {
-  // 4.1 REJECT REQUEST: all but the GET
-  if (data.method == 'get') {
-    // 4.2 Prepare data for interpolation
-    const templateData = {
-      'head.title': 'Account Deleted',
-      'head.description': 'Your account has been deleted',
-      'body.class': 'accountDeleted'
-    };
-    // 4.3 Make template into a string
-    helpers.getTemplate('accountDeleted', templateData, (err, str) => {
-      if (!err && str) {
-        // 4.4 Add Universal haeder and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            // 4.5 Return the html page as requested
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-  } else {
-    callback(405, undefined, 'html');
-  }
-};
-// 7. CHECK CREATE HANDLER
+// 7. CREATE CHECK HANDLER
 handlers.checksCreate = (data, callback) => {
-  // 7.1 REJECT REQUEST: all but the GET
+  // 7.1 Reject all methods that aren't get
   if (data.method == 'get') {
-    // 7.2 Prepare data for interpolation
+    // 7.2 Prepare the data for interpolation
     const templateData = {
-      'head.title': 'Create a new Check',
+      'head.title': 'Create a new check',
       'body.class': 'checksCreate'
     };
-    // 7.3 Make template into a string
+    // 7.3 Read in the template as a string
     helpers.getTemplate('checksCreate', templateData, (err, str) => {
       if (!err && str) {
-        // 7.4 Add Universal haeder and footer
+        // 7.4 Get the universal header and footer
         helpers.addUniversalTemplates(str, templateData, (err, str) => {
           if (!err && str) {
-            // 7.5 Return the html page as requested
             callback(200, str, 'html');
           } else {
             callback(500, undefined, 'html');
@@ -236,26 +232,28 @@ handlers.checksCreate = (data, callback) => {
         callback(500, undefined, 'html');
       }
     });
+
   } else {
     callback(405, undefined, 'html');
   }
-};
-// 8. CHECKS ALL / DASHBOARD HANDLER
+}
+
+// 8. DASHBOARD / CHECKS ALL HANDLER
 handlers.checksList = (data, callback) => {
-  // 8.1 REJECT REQUEST: all but the GET
+  // 8.1 Reject all request that isn't a GET
   if (data.method == 'get') {
-    // 8.2 Prepare data for interpolation
+    // 8.2 Prepare the data for interpolation
     const templateData = {
       'head.title': 'Dashboard',
       'body.class': 'checksList'
     };
-    // 8.3 Make template into a string
+
+    // 8.3 Read in a tempalate as a string
     helpers.getTemplate('checksList', templateData, (err, str) => {
       if (!err && str) {
-        // 8.4 Add Universal haeder and footer
+        // 8.4 Add the universal header and footer
         helpers.addUniversalTemplates(str, templateData, (err, str) => {
           if (!err && str) {
-            // 8.5 Return the html page as requested
             callback(200, str, 'html');
           } else {
             callback(500, undefined, 'html');
@@ -268,47 +266,76 @@ handlers.checksList = (data, callback) => {
   } else {
     callback(405, undefined, 'html');
   }
-};
-// 9. CHECKS EDIT HANDLER
+}
+
+// 9. EDIT THE CHECKS
 handlers.checksEdit = (data, callback) => {
-  // 9.1 REJECT REQUEST: all but the GET
+  // 9.1 Reject all request that isn't a GET
   if (data.method == 'get') {
-    // 9.2 Prepare data for interpolation
-    const templateData = {
+    // 9.2 Prepare the data for interpolation
+    let templateData = {
       'head.title': 'Checks Details',
       'body.class': 'checksEdit'
     };
-    // 9.3 Make template into a string
+    // 9.3 Read in a tempalate as a string
     helpers.getTemplate('checksEdit', templateData, (err, str) => {
       if (!err && str) {
-        // 9.4 Add Universal haeder and footer
+        // 9.4 Add the universal header and footer
         helpers.addUniversalTemplates(str, templateData, (err, str) => {
           if (!err && str) {
-            // 9.5 Return the html page as requested
             callback(200, str, 'html');
           } else {
             callback(500, undefined, 'html');
           }
-        });
+        })
       } else {
         callback(500, undefined, 'html');
       }
-    });
+    })
   } else {
     callback(405, undefined, 'html');
   }
-};
-// 10. STATIC ASSETS HANDLER
-handlers.public = (data, callback) => {
-  // 10.1 REJECT REQUEST: all but the GET
+}
+
+
+
+/*
+*  II. STATIC ASSETS HANDLERS
+*
+*/
+
+// 2. Favicon handlers
+handlers.favicon = (data, callback) => {
+  // 2.1 Reject any method that isn't a GET
   if (data.method == 'get') {
-    // 10.2 Get the file name from the request
+    // 2.2 Server the favicon.
+    // Read in the favicon's data
+    helpers.getStaticAsset('favicon.ico', (err, data) => {
+      if (!err && data) {
+        // 2.2 Callback the data
+        callback(200, data, 'favicon');
+      } else {
+        callback(500);
+      }
+    });
+  } else {
+    callback(405);
+  }
+}
+
+// 3. Public Assets
+handlers.public = (data, callback) => {
+  // 3.1 Reject any method that isn't a GET
+  if (data.method == 'get') {
+    // 3.2 Get the file name that been requested
     let trimmedAssetName = data.trimmedPath.replace('public/', '').trim();
-    if (trimmedAssetName) {
-      // 10.3 Fetch the asset
-      helpers.getStaticAssets(trimmedAssetName, (err, data) => {
+    // 3.3. Continue if there is a file
+    if (trimmedAssetName.length > 0) {
+      // 3.4 Read in the asset's data
+      helpers.getStaticAsset(trimmedAssetName, (err, data) => {
         if (!err && data) {
-          // 10.4 Determine the content Type of the asset
+          // 3.5 What kind of asset the data has
+          // Determine the content type (default to plain text)
           let contentType = 'plain';
           if (trimmedAssetName.indexOf('.css') > -1) {
             contentType = 'css';
@@ -325,6 +352,8 @@ handlers.public = (data, callback) => {
           if (trimmedAssetName.indexOf('.ico') > -1) {
             contentType = 'favicon';
           }
+
+          // 3.6 Callback the data
           callback(200, data, contentType);
         } else {
           callback(404);
@@ -336,33 +365,14 @@ handlers.public = (data, callback) => {
   } else {
     callback(405);
   }
-};
-// 11. FAVICON HANDLER
-handlers.favicon = (data, callback) => {
-  // 11.1 REJECT REQUEST: all but the GET
-  if (data.method == 'get') {
-    // 11.2 Fetch the favicon
-    helpers.getStaticAssets('favicon.ico', (err, data) => {
-      if (!err && data) {
-        // 11.3 Return the data
-        callback(200, data, 'favicon');
-      } else {
-        callback(500);
-      }
-    });
-  } else {
-    callback(405)
-  }
-};
+}
 
 /*
-* III. JSON DATA API HADNLERS
+*  III. JSON API HANDLERS
 *
 */
 
-// 1. USER SERVICE
-
-// 1.1 MAIN CONTAINER
+// 3. USER SERVICE
 handlers.users = (data, callback) => {
   const acceptableMethods = ['post', 'get', 'put', 'delete'];
   if (acceptableMethods.indexOf(data.method) > -1) {
@@ -371,15 +381,14 @@ handlers.users = (data, callback) => {
     callback(405);
   }
 };
-
-// 1.2 _SUB_CONTAINER
+// 3.1 Container for the users sub methods
 handlers._users = {};
 
-// 1.3 USERS POST HANDLER
+// 3.2. Handlers USER POST
 // @required data: firstName, lastName, phone, password, tosAgreement
 // @optional data: none
 handlers._users.post = (data, callback) => {
-  // 1.3.1 Check that the all fileds type is correct
+  // 3.2.1 Check that all the fields are filled out
   const firstName = typeof (data.payload.firstName) == 'string' &&
     data.payload.firstName.trim().length > 0 ?
     data.payload.firstName.trim() : false;
@@ -395,14 +404,14 @@ handlers._users.post = (data, callback) => {
   const tosAgreement = typeof (data.payload.tosAgreement) == 'boolean' &&
     data.payload.tosAgreement == true ? true : false;
 
-  // 1.3.2 Check that all the fields are present
-  if (firstName, lastName, phone, password, tosAgreement) {
-    // 1.3.3 Check that the user do not exist
+  if (firstName && lastName && phone && password && tosAgreement) {
+    // 3.2.2. Make user that the user doesn't exist
     _data.read('users', phone, (err, data) => {
       if (err) {
-        // 1.3.4 Create the user Object
+        // 3.2.3 Hash the password
         const hashedPassword = helpers.hash(password);
         if (hashedPassword) {
+          // 3.2.4 Creat the user object
           const userObject = {
             'firstName': firstName,
             'lastName': lastName,
@@ -410,47 +419,49 @@ handlers._users.post = (data, callback) => {
             'hashedPassword': hashedPassword,
             'tosAgreement': true
           };
-          // 1.3.5 Store the user data to the file system
+          // Store the user
           _data.create('users', phone, userObject, (err) => {
             if (!err) {
               callback(200);
             } else {
-              callback(500, { 'Error': 'Could not create user' });
+              callback(500, { 'Error': 'Could not hash the user\'s password' });
             }
-          });
+          })
         } else {
-          callback(500, {
-            'Error': 'Could not hash the user\'s password'
-          });
+          callback(500, { 'Error': 'COuld not hash the user\'s password' });
         }
+
       } else {
-        callback(400, { 'Error': 'User with this phone number already exist' });
+        callback(400, { 'Error': 'User with that phone number already exist' });
       }
-    });
+    })
   } else {
-    callback(400, { 'Error': 'Missing Required Field to Create User' })
+    callback(400, { 'Error': 'Missing Required Fields' });
   }
+
 };
 
-// 1.4 USERS GET HANDLER
-// @required data: phone
-// @optional data: none
-// @todo: only let the authenticated users to access their data
+// 3.3 Handlers USER GET
+// @required: phone
+// @optional: none
+// @todo: only let the authenticated users access their object
 handlers._users.get = (data, callback) => {
-  //1.4.1 Check that the phone is has a valid type and length
+  // 3.1. Check that the phone is valid
   const phone = typeof (data.queryStringObject.phone) == 'string' &&
     data.queryStringObject.phone.trim().length == 10 ?
     data.queryStringObject.phone.trim() : false;
 
   if (phone) {
-    // 1.4.2 VERIFY TOKEN: provided in headers
+    // 3.1.1 Vefify the token
+    // Get the token from the headers
     const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
+    // 3.1.2 Verify the token is valid for the phone number
     handlers._tokens.verifyToken(token, phone, (tokenIsValid) => {
       if (tokenIsValid) {
-        // 1.4.3 Fetch the user data
+        // 3.2. Look up the user
         _data.read('users', phone, (err, data) => {
           if (!err && data) {
-            // 1.4.4 Password should be removed
+            // 3.3. Remove the hashed pasword
             delete data.hashedPassword;
             callback(200, data);
           } else {
@@ -458,25 +469,25 @@ handlers._users.get = (data, callback) => {
           }
         });
       } else {
-        callback(403, { 'Error': 'Provided token is invalid, or expired' });
+        callback(403, { 'Error': 'The token id is not valid, or expired' });
       }
     });
   } else {
-    callback(400, { 'Error': 'Missing Required Fields to GET USER DATA' })
+    callback(400, { 'Error': 'Missing Required Field' });
   }
+
 };
 
-// 1.5 USERS PUT HANDLER
-// @required data: phone
-// @optional data: firstName, lastName, password (at least one should be provided)
-// @todo: only authenticated user can access their data
+// 3.4 Handlers USER PUT
+// @required: phone
+// @optional: firstName, lastName, password (at least one should be)
+// @todo: only authenticated users can update the data
 handlers._users.put = (data, callback) => {
-  // 1.5.1 Check the required field type and length
+  // 3.4.1 Check for the required field
   const phone = typeof (data.payload.phone) == 'string' &&
     data.payload.phone.trim().length == 10 ?
     data.payload.phone.trim() : false;
-
-  // 1.5.2 Check the optional fileds type
+  // 3.4.2 Check for the optional fields
   const firstName = typeof (data.payload.firstName) == 'string' &&
     data.payload.firstName.trim().length > 0 ?
     data.payload.firstName.trim() : false;
@@ -487,18 +498,19 @@ handlers._users.put = (data, callback) => {
     data.payload.password.trim().length > 0 ?
     data.payload.password.trim() : false;
 
-  // 1.5.3 Phone is valid => proceed
+  // 3.4.2 Continue if the phone is valid
   if (phone) {
-    // 1.5.4 Optional fields should be present => proceed
+    // 3.4.3 Error if there's nothing to update
     if (firstName || lastName || password) {
-      // 1.5.5 VERIFY TOKEN: provided in headers
+
+      // 3.4.3.1 Verify the token
       const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
       handlers._tokens.verifyToken(token, phone, (tokenIsValid) => {
         if (tokenIsValid) {
-          // 1.5.6 Fetch the user data
+          // 3.4.4. Look up the user
           _data.read('users', phone, (err, userData) => {
             if (!err && userData) {
-              // 1.5.7 Update the userData object with provided optional data
+              // 3.4.5 Update the fields
               if (firstName) {
                 userData.firstName = firstName;
               }
@@ -508,13 +520,13 @@ handlers._users.put = (data, callback) => {
               if (password) {
                 userData.hashedPassword = helpers.hash(password);
               }
-              // 1.5.8 Store the user data to the file system
+              // 3.4.5. Store the updates
               _data.update('users', phone, userData, (err) => {
                 if (!err) {
                   callback(200);
                 } else {
                   console.log(err);
-                  callback(500, { 'Error': 'Could not update the user data' });
+                  callback(500, { 'Error': 'Could not update the user' });
                 }
               });
             } else {
@@ -522,50 +534,49 @@ handlers._users.put = (data, callback) => {
             }
           });
         } else {
-          callback(403, { 'Error': 'Provided token is invalid, or expired' });
+          callback(403, { 'Error': 'Token is invalid or expired' });
         }
       });
     } else {
-      callback(400, { 'Error': 'Data for Updates is not provided' });
+      callback(400, { 'Error': 'Missing data to update' });
     }
   } else {
-    callback(400, { 'Error': 'Missing Required Field to update user' });
+    callback(400, { 'Error': 'Missing Required Field' });
   }
 };
 
-// 1.6 USERS DELETE HANDLER
-// @required data: phone
-// @todo: only authenticated user can access their data
-// @todo: delete any other associated files
+// 3.5 Handlers USER DELETE
+// @required: phone
+// @todo: only let the authenticated user delete object
+// @todo: delete any other assocciated files
 handlers._users.delete = (data, callback) => {
-  // 1.6.1 Check the required field type and length
+  // 3.5.1. Check that the phone is valid
   const phone = typeof (data.queryStringObject.phone) == 'string' &&
     data.queryStringObject.phone.trim().length == 10 ?
     data.queryStringObject.phone.trim() : false;
-
-  // 1.6.2 Phone is valid => proceed
   if (phone) {
-    // 1.6.3 VERIFY TOKEN: provided in headers
+
+    // 3.5.1.1 Verify the token
     const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
     handlers._tokens.verifyToken(token, phone, (tokenIsValid) => {
       if (tokenIsValid) {
-        // 1.6.4 Fetch the user data
         _data.read('users', phone, (err, userData) => {
           if (!err && userData) {
-            // 1.6.5 Delete the user data
+            // 3.5.2 Delete the data
             _data.delete('users', phone, (err) => {
               if (!err) {
-                // 1.6.6 Delete other associated data with the user (checks)
+                // 3.5.3 Delete the data associated with the user (checks)
                 const userChecks = typeof (userData.checks) == 'object' &&
                   userData.checks instanceof Array ?
                   userData.checks : [];
                 const checksToDelete = userChecks.length;
                 if (checksToDelete > 0) {
-                  // 1.6.7 Set the loop for deletion
+                  // 3.5.4 Delete some checks
                   let checksDeleted = 0;
                   let deletionErrors = false;
+                  // 3.5.5 Loop  throught the checks
                   userChecks.forEach((checkId) => {
-                    // 1.6.8 Delete the checks
+                    // 3.5.6 Delete a check
                     _data.delete('checks', checkId, (err) => {
                       if (err) {
                         deletionErrors = true;
@@ -575,7 +586,7 @@ handlers._users.delete = (data, callback) => {
                         if (!deletionErrors) {
                           callback(200);
                         } else {
-                          callback(500, { 'Error': 'Errors encountered, could not delete all checks' });
+                          callback(500, { 'Error': 'Errors encountered, could not delete all the checks' });
                         }
                       }
                     });
@@ -586,23 +597,21 @@ handlers._users.delete = (data, callback) => {
               } else {
                 callback(500, { 'Error': 'Could not delete the user' });
               }
-            });
+            })
           } else {
-            callback(400, { 'Error': 'Specified user is not found' });
+            callback(400, { 'Error': 'Could not find the specified user' });
           }
         });
       } else {
-        callback(403, { 'Error': 'Provided token is invalid, or expired' });
+        callback(403, { 'Error': 'The token have expired, or invalid' });
       }
     });
   } else {
-    callback(400, { 'Error': 'Missing Required Field to Delete User Data' });
+    callback(400, { 'Error': 'Missing Required Field' });
   }
 };
 
-// 2. TOKEN SERVICE
-
-// 2.1 MAIN CONTAINER
+// 4. TOKEN SERVICE
 handlers.tokens = (data, callback) => {
   const acceptableMethods = ['post', 'get', 'put', 'delete'];
   if (acceptableMethods.indexOf(data.method) > -1) {
@@ -612,14 +621,14 @@ handlers.tokens = (data, callback) => {
   }
 };
 
-// 2.2 _SUB_CONTAINER
+// 4.1 Container for the sub methods
 handlers._tokens = {};
 
-// 2.3 TOKENS POST HANDLER
+// 4.2 Token POST
 // @required data: phone, password
 // @optional data: none
 handlers._tokens.post = (data, callback) => {
-  // 2.3.1 Check the type of the required data
+  // 4.2.1 Check the required data
   const phone = typeof (data.payload.phone) == 'string' &&
     data.payload.phone.trim().length == 10 ?
     data.payload.phone.trim() : false;
@@ -627,15 +636,14 @@ handlers._tokens.post = (data, callback) => {
     data.payload.password.trim().length > 0 ?
     data.payload.password.trim() : false;
 
-  // 2.3.2 If the data is valid => proceed
   if (phone && password) {
-    // 2.3.3 Fetch the user, who matches the phone number
+    // 4.2.2 Look up the user who matches the phone
     _data.read('users', phone, (err, userData) => {
       if (!err && userData) {
-        // 2.3.4 Compare the provided password with the stored password
+        // 4.2.3 Hash the send password and compare it to the stored password
         const hashedPassword = helpers.hash(password);
         if (hashedPassword == userData.hashedPassword) {
-          // 2.3.5 Create a new TOKEN
+          // 4.2.4 If valid create a new token with a random name. Set exparation data
           const tokenId = helpers.createRandomString(20);
           const expires = Date.now() + 1000 * 60 * 60;
           const tokenObject = {
@@ -643,36 +651,35 @@ handlers._tokens.post = (data, callback) => {
             'id': tokenId,
             'expires': expires
           };
-          // 2.3.6 Store the token in the file system
+          // Store the token
           _data.create('tokens', tokenId, tokenObject, (err) => {
             if (!err) {
               callback(200, tokenObject);
             } else {
-              callback(500, { 'Error': 'Could not create a token' });
+              callbacka(500, { 'Errror': 'Could not create a token' });
             }
-          });
+          })
         } else {
-          callback(400, { 'Error': 'Password do not match the users password' });
+          callback(400, { 'Error': 'Password did not match the specified users stored password' });
         }
       } else {
-        callback(400, { 'Error': 'User do not exist' });
+        callback(400, { 'Error': 'Specified user do not exist' });
       }
     });
   } else {
-    callback(400, { 'Error': 'Missing Required fileds for the token' });
+    callback(400, { 'Error': 'Missing required Fields' });
   }
 };
-
-// 2.4 TOKENS GET HANDLER
-// @required data: id
-// @optional data: none
+// 4.3. Token GET
+// @required: id
+// @optional: none
 handlers._tokens.get = (data, callback) => {
-  // 2.4.1 Check the type of the required data
+  // 4.3.1 Check that the id is valid
   const id = typeof (data.queryStringObject.id) == 'string' &&
     data.queryStringObject.id.trim().length == 20 ?
     data.queryStringObject.id.trim() : false;
   if (id) {
-    // 2.4.2 Fetch the token
+    // Read teh token
     _data.read('tokens', id, (err, tokenData) => {
       if (!err && tokenData) {
         callback(200, tokenData);
@@ -681,83 +688,83 @@ handlers._tokens.get = (data, callback) => {
       }
     });
   } else {
-    callback(400, { 'Error': 'Missing Required Field to get the Token' });
+    callback(400, { 'Error': 'Missing Required Fields' });
   }
-};
-
-// 2.5 TOKENS PUT HANDLER
-// @required data: id, extend
-// @optional data: none
+}
+// 4.4 Token PUT
+// @require: id, extend
+// @optional: none
 handlers._tokens.put = (data, callback) => {
-  // 2.5.1 Check the typeof the required fields and validate them to proceed
+  // 4.4.1 validate the required fileds
   const id = typeof (data.payload.id) == 'string' &&
     data.payload.id.trim().length == 20 ?
     data.payload.id.trim() : false;
   const extend = typeof (data.payload.extend) == 'boolean' &&
     data.payload.extend == true ? true : false;
   if (id && extend) {
-    // 2.5.2 Fetch the token
+    // 4.4.2 Look up the token
     _data.read('tokens', id, (err, tokenData) => {
       if (!err && tokenData) {
-        // 2.5.3 Check if the token is valid
+        // 4.4.3 Check if the token have not expired
         if (tokenData.expires > Date.now()) {
-          // 2.5.4 Set the exparation date + 1 HOUR from now
+          // 4.4.4 Set the exparation to 1 hour into the future
           tokenData.expires = Date.now() + 1000 * 60 * 60;
-          // 2.5.5 Store the data to the file system
+          // 4.4.5 Save the data to disk
           _data.update('tokens', id, tokenData, (err) => {
             if (!err) {
               callback(200);
             } else {
               callback(500, { 'Error': 'Could not update the token' });
             }
-          });
+          })
         } else {
-          callback(400, { 'Error': 'Token have expired' });
+          callback(400, { 'Error': 'The token have expired' });
         }
       } else {
-        callback(400, { 'Error': 'No such Token exists' });
+        callback(400, { 'Error': 'Specified token do not exist' });
       }
     });
   } else {
-    callback(400, { 'Error': 'Missing required fileds, or they are invalid to update the Token' });
+    callback(400, { 'Error': 'Missing Required Fields or fields are invalid' });
   }
-};
-
-// 2.6 TOKENS DELETE HANDLER
-// @required data: id
-// @optional data: none
+}
+// 4.5 Token Delete
+// @required: id
+// @optional: none
 handlers._tokens.delete = (data, callback) => {
-  // 2.6.1 Chec teh typeof of the required data and validate it
+  // 4.5.1 Check if the id is valid
   const id = typeof (data.queryStringObject.id) == 'string' &&
     data.queryStringObject.id.trim().length == 20 ?
     data.queryStringObject.id.trim() : false;
   if (id) {
-    // 2.6.2 Feth the token
+    // 4.5.2 Look up the token
     _data.read('tokens', id, (err, data) => {
       if (!err && data) {
-        // 2.6.3 Delete the token data
+        // 4.5.3 Delete the data
         _data.delete('tokens', id, (err) => {
           if (!err) {
             callback(200);
           } else {
-            callback(500, { 'Error': 'Could not delete Token' });
+            callback(500, { 'Error': 'Could not delete the token' });
           }
-        });
+        })
       } else {
-        callback(400, { 'Error': ' Could not find the token' });
+        callback(400, { 'Error': 'Could not find the specified token ' });
       }
-    });
+    })
   } else {
-    callback(400, { 'Error': 'Missing Required Fileds to delete the Token' });
+    callback(400, { 'Error': 'Missing Required Fields' });
   }
 };
 
-// 2.7 Verify if the TokenId is currently valid for the given user
+
+
+// 4.6 Verify TokenId is currently valid for the given user
 handlers._tokens.verifyToken = (id, phone, callback) => {
-  // 2.7.1 Fet the token
+  // 4.6.1 Look up the token
   _data.read('tokens', id, (err, tokenData) => {
     if (!err && tokenData) {
-      // 2.7.2 Check that the token corresponds to the user and valid
+      // 4.6.2 Check taht the token is for the given user and have not expired
       if (tokenData.phone == phone && tokenData.expires > Date.now()) {
         callback(true);
       } else {
@@ -767,10 +774,9 @@ handlers._tokens.verifyToken = (id, phone, callback) => {
       callback(false);
     }
   });
-}
+};
 
-// 3. CHECKS SERVICE
-// 3.1 MAIN CONTAINER
+// 5. CHECKS SERVICE
 handlers.checks = (data, callback) => {
   const acceptableMethods = ['post', 'get', 'put', 'delete'];
   if (acceptableMethods.indexOf(data.method) > -1) {
@@ -779,14 +785,16 @@ handlers.checks = (data, callback) => {
     callback(403);
   }
 }
-// 3.2 _SUB_CONTAINER
+
+// 5.1. Create a container for sub method for checks
 handlers._checks = {};
 
-// 3.3 CHECKS POST HANDLER
-// @required data: protocol, url, method, successCodes, timeoutSeconds
-// @optional data: none
+// 5.2. Checks POST
+// @requried: protocol, url, method, successCodes, timeoutSeconds
+// @optional: none
 handlers._checks.post = (data, callback) => {
-  // 3.3.1 Validate the typeof the required data
+
+  // 5.2.1 Validate the inputs
   const protocol = typeof (data.payload.protocol) == 'string' &&
     ['http', 'https'].indexOf(data.payload.protocol) > -1 ?
     data.payload.protocol : false;
@@ -807,24 +815,24 @@ handlers._checks.post = (data, callback) => {
     data.payload.timeoutSeconds : false;
 
   if (protocol && url && method && successCodes && timeoutSeconds) {
-    // 3.3.2 Validate the token
+    // 5.2.2 Check that the token is valid
     const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
-    // 3.3.3 Fetch the user data through the token data
+    // 5.2.3. Look up the user by reading the token
     _data.read('tokens', token, (err, tokenData) => {
       if (!err && tokenData) {
-        // 3.3.4 Get the User phone number
+        // 5.2.4. Get the user phone number
         const userPhone = tokenData.phone;
-        // 3.3.5 Get the user data
+        // 5.2.5 Ge the user data
         _data.read('users', userPhone, (err, userData) => {
           if (!err && userData) {
-            // 3.3.6 Validate the checks type
             const userChecks = typeof (userData.checks) == 'object' &&
               userData.checks instanceof Array ?
               userData.checks : [];
-            // 3.3.7 Verify that the user has less than the maximum number of checks
+            // 5.2.6 Verify that the user has less than the maximumChecks number
             if (userChecks.length < config.maxChecks) {
-              // 3.3.8 Create a random id for the new check and checkObject
+              // 5.2.7 Create the random id for the new check
               const checkId = helpers.createRandomString(20);
+              // 5.2.8 Create the checksObject and include the usersPhone
               const checkObject = {
                 'id': checkId,
                 'userPhone': userPhone,
@@ -834,89 +842,89 @@ handlers._checks.post = (data, callback) => {
                 'successCodes': successCodes,
                 'timeoutSeconds': timeoutSeconds
               };
-              // 3.3.9 Store the object to the file system
+              // 5.2.9 Save the object to the system
               _data.create('checks', checkId, checkObject, (err) => {
                 if (!err) {
-                  // 3.3.10 Add teh checkId to the userObject
+                  // 5.2.10. Add the checkId to the userObject
                   userData.checks = userChecks;
                   userData.checks.push(checkId);
-                  // 3.3.11 Store the new userData to the file system
+                  // 5.2.11 Save the new data
                   _data.update('users', userPhone, userData, (err) => {
                     if (!err) {
+                      // 5.2.12 Return the data about the new check to the requestor
                       callback(200, checkObject);
                     } else {
                       callback(500, { 'Error': 'Could not update the user with the new check' });
                     }
-                  });
+                  })
                 } else {
                   callback(500, { 'Error': 'Could not create the new check' });
                 }
-              });
+              })
             } else {
-              callback(400, { 'Error': `User has the maximum number of checks ${config.maxChecks}` });
+              callback(400, { 'Error': `The user already has the maximum number of checks ${config.maxChecks}` });
             }
           } else {
-            callback(400, { 'Error': 'User doesn\'t exist' });
+            callback(403, { 'Error': 'The user do not exist' });
           }
-        });
+        })
       } else {
         callback(403, { 'Error': 'Token is invalid, or expired' });
       }
     });
   } else {
-    callback(400, { 'Error': 'Missing Required fields for the Checks Creation' });
+    callback(400, { 'Error': 'Missing Required inputs, or inputs are invalid' });
   }
-};
+}
 
-// 3.4 CHECKS GET HANDLER
-// @required data: id
-// @optional data: none
+// 5.3. Checks GET
+// @requried: id
+// @optional: none
 handlers._checks.get = (data, callback) => {
-  //3.4.1 Validate the required data
+  // 5.3.1. Check that id is valid
   const id = typeof (data.queryStringObject.id) == 'string' &&
     data.queryStringObject.id.trim().length == 20 ?
     data.queryStringObject.id.trim() : false;
   if (id) {
-    // 3.4.2 Fetch the chekc by id
+    // 5.3.2 Look up the check
     _data.read('checks', id, (err, checkData) => {
       if (!err && checkData) {
-        // 3.4.3 Verify the provided token
-        const token = typeof (data.headers.token) == 'string' ? data.haeder.token : false;
+        // 5.3.3. Varify the token
+        const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
         handlers._tokens.verifyToken(token, checkData.userPhone, (tokenIsValid) => {
           if (tokenIsValid) {
-            // 3.4.4 Return the check data to the user
+            // 5.3.4 Return the data to the user
             callback(200, checkData);
           } else {
             callback(403, { 'Error': 'The provided token is invalid' });
           }
         });
       } else {
-        callback(404, { 'Error': 'Theres no such check data' });
+        callback(404, { 'Error': 'There no such check data' });
       }
-    });
+    })
   } else {
-    callback(400, { 'Error': 'The ID  to get the Check is invalid' });
+    callback(400, { 'Error': 'The id is invalid' });
   }
-};
+}
 
-// 3.5 CHECKS PUT HANDLER
-// @required data: id
-// @optional data: protocol, url, method, successCodes, timeoutSeconds ( one should be provided)
+// 5.4. Checks PUT
+// @requried: id
+// @optional: protocol, url, method, successCodes, timeoutSeconds ( one should be present)
 handlers._checks.put = (data, callback) => {
-  // 3.5.1 Validate the required data type
+  // 5.4.1 Check for the required fields type
   const id = typeof (data.payload.id) == 'string' &&
     data.payload.id.trim().length == 20 ?
     data.payload.id.trim() : false;
-  // 3.5.2 Validate the optional data type
+  // 5.4.2 Check for optional fields type
   const protocol = typeof (data.payload.protocol) == 'string' &&
-    ['http', 'https'].indexOf(data.payload.protocol) > -1 ?
+    ['https', 'http'].indexOf(data.payload.protocol) > - 1 ?
     data.payload.protocol : false;
   const url = typeof (data.payload.url) == 'string' &&
     data.payload.url.trim().length > 0 ?
     data.payload.url.trim() : false;
   const method = typeof (data.payload.method) == 'string' &&
-    ['post', 'get', 'put', 'delete'].indexOf(data.payload.method) > -1 &&
-    data.payload.method instanceof Array ?
+    ['post', 'get', 'put', 'delete'].indexOf(data.payload.method) > -1 ?
     data.payload.method : false;
   const successCodes = typeof (data.payload.successCodes) == 'object' &&
     data.payload.successCodes instanceof Array &&
@@ -927,18 +935,19 @@ handlers._checks.put = (data, callback) => {
     data.payload.timeoutSeconds >= 1 &&
     data.payload.timeoutSeconds <= 5 ?
     data.payload.timeoutSeconds : false;
-  // 3.5.2 Validate the required data
+
+  // 5.4.3 Check for id validation
   if (id) {
-    // 3.5.3 Check for optional data
+    // 5.4.4 Check for optional fields
     if (protocol || url || method || successCodes || timeoutSeconds) {
-      // 3.5.4 Fetch the check data
-      _date.read('checks', id, (err, checkData) => {
+      // 5.4.5. Look up the check
+      _data.read('checks', id, (err, checkData) => {
         if (!err && checkData) {
-          // 3.5.5 Verify the provided token
-          const token = typeof (data.headers.token) == 'string' ? data.header.token : false;
+          // 5.4.6 Verify token data
+          const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
           handlers._tokens.verifyToken(token, checkData.userPhone, (tokenIsValid) => {
             if (tokenIsValid) {
-              // 3.5.6 Update the check data with optional data
+              // 5.4.7 Update the check where neccessary
               if (protocol) {
                 checkData.protocol = protocol;
               }
@@ -954,61 +963,59 @@ handlers._checks.put = (data, callback) => {
               if (timeoutSeconds) {
                 checkData.timeoutSeconds = timeoutSeconds;
               }
-              // 3.5.6 Store the check data updates to the file system
+              // 5.4.8 Store the update
               _data.update('checks', id, checkData, (err) => {
                 if (!err) {
-                  callback(200, checkData);
+                  callback(200);
                 } else {
                   callback(500, { 'Error': 'Could not update the check' });
                 }
-              });
+              })
             } else {
-              callback(403, { 'Error': 'The token is invalid, or expired' });
+              callback(403, { 'Error': 'Your not authorized' });
             }
-          });
+          })
         } else {
-          callback(400, { 'Error': 'There is no such checkData' });
+          callback(400, { 'Error': 'There is no check data id' });
         }
       });
     } else {
-      callback(400, { 'Error': 'No data to update the check' });
+      callback(400, { 'Error': 'No fields to update' });
     }
   } else {
-    callback(400, { 'Error': 'Missing Required Filed to update the check' });
+    callback(400, { 'Erorr': 'Missing Required field' });
   }
-};
+}
 
-// 3.6 CHECKS DELETE HANDLER
-// @required data: id
-// @optional data: none
+// 5.5. Checks DELETE
+// @requried: id
+// @optional: none
 handlers._checks.delete = (data, callback) => {
-  // 3.6.1 Validate the required data
+  // 5.5.1  Check if id is valid
   const id = typeof (data.queryStringObject.id) == 'string' &&
     data.queryStringObject.id.trim().length == 20 ?
     data.queryStringObject.id.trim() : false;
   if (id) {
-    // 3.6.2 Fetch the check
+    // 5.5.2 Look up the check to delete
     _data.read('checks', id, (err, checkData) => {
       if (!err && checkData) {
-        // 3.6.3 Verify the provided token
         const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
         handlers._tokens.verifyToken(token, checkData.userPhone, (tokenIsValid) => {
           if (tokenIsValid) {
-            // 3.6.4. Delete the check data
+            // 5.5.3 Delete the check data
             _data.delete('checks', id, (err) => {
               if (!err) {
-                // 3.6.5 Fetch the user Data to update the check array
+                // 5.5.4 Look up the user and modify the check
                 _data.read('users', checkData.userPhone, (err, userData) => {
                   if (!err && userData) {
-                    // 3.6.6 Get the user checks list
-                    const userChecks = typeof (userData.checks) == 'object' &&
-                      userData.checks instanceof Array ?
+                    // 5.5.5 Find the userChecks
+                    const userChecks = typeof (userData.checks) == 'object' && userData.checks instanceof Array ?
                       userData.checks : [];
-                    // 3.6.7 Delete the deleted checks from the checks list
+                    // 5.5.6 Remove the deleted checks form the checks
                     const checkPosition = userChecks.indexOf(id);
                     if (checkPosition > -1) {
                       userChecks.splice(checkPosition, 1);
-                      // 3.6.8 Store the user data to the file system
+                      //5.5.7 resave the users data
                       _data.update('users', checkData.userPhone, userData, (err) => {
                         if (!err) {
                           callback(200);
@@ -1017,31 +1024,29 @@ handlers._checks.delete = (data, callback) => {
                         }
                       });
                     } else {
-                      callback(500, { 'Error': 'Could not find the checks on the user object, so could not remove it' });
+                      callback(500, { 'Error': 'Could not find the checks on the user object so could not remove it' });
                     }
+
                   } else {
-                    callback(500, { 'Error': ' Could not find the user who created the check, so could not delte the check from the list of checks' });
+                    callback(500, { 'Error': 'Could notfind the user who created the cehck, so could not delete the check from the list of checks' });
                   }
                 });
               } else {
-                callback(500, { 'Error': 'Could not delete the check' });
+                callback(500, { 'Error': 'Could not delete the check data' });
               }
-            });
+            })
           } else {
-            callback(403, { 'Error': 'The token is invalid, or expired' });
+            callback(403, { 'Error': 'Token is invalid or expired' });
           }
-        });
+        })
       } else {
-        callback(400, { 'Error': 'No such check' });
+        callback(400, { 'Error': ' There is no such check by id' });
       }
-    });
+    })
   } else {
-    callback(400, { 'Error': 'Missing required data to delete a check' });
+    callback(403, { 'Error': 'Missing required field' });
   }
-};
+}
 
-
-
-
-// 3. EXPORT THE HANDLERS
+// 9. Export the handlers
 module.exports = handlers;

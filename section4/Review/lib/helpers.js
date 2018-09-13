@@ -111,12 +111,90 @@ helpers.sendTwilioSms = (phone, msg, callback) => {
   }
 };
 // 7. FETCH THE TEMPLATE: Get the String Content of the TEMPLATE
-
+helpers.getTemplate = (templateName, data, callback) => {
+  // 7.1 Check the typeof the provided data
+  templateName = typeof (templateName) == 'string'
+    && templateName.length > 0 ? templateName : false;
+  data = typeof (data) == 'object' &&
+    data !== null ? data : {};
+  if (templateName) {
+    // 7.2 Fetch the template from the folder
+    const templatesDir = path.join(__dirname, '/../templates/');
+    fs.readFile(templatesDir + templateName + '.html', 'utf-8', (err, str) => {
+      if (!err && str && str.length > 0) {
+        // 7.3 Interpolate the string before returning
+        let finalString = helpers.interpolate(str, data);
+        callback(false, finalString);
+      } else {
+        callback('No template could be found');
+      }
+    });
+  } else {
+    callback('A valid template name was not provided');
+  }
+};
 // 8. UNIVERSAL TEMPLATES: Add the universal header and footer to a string and pass the provided data object to the header and footer for interpolation
-
+helpers.addUniversalTemplates = (str, data, callback) => {
+  // 8.1 Check the data type
+  str = typeof (str) == 'string' && str.length > 0 ? str : '';
+  data = typeof (data) == 'object' && data !== null ? data : {};
+  // 8.2 Fetch the header template
+  helpers.getTemplate('_header', data, (err, headerString) => {
+    if (!err && headerString) {
+      // 8.3 Fetch the footer template
+      helpers.getTemplate('_footer', data, (err, footerString) => {
+        if (!err && footerString) {
+          // 8.4 Add Strings together: header + str + footer
+          const fullString = headerString + str + footerString;
+          callback(false, fullString);
+        } else {
+          callback('Could not find the footer template');
+        }
+      });
+    } else {
+      callback('Could not find the header template');
+    }
+  });
+}
 // 9. INTERPOLATE: Take a given string and a data object and find/replace all the keys within it
-
+helpers.interpolate = (str, data) => {
+  // 9.1 Check the typeof data
+  str = typeof (str) == 'string' && str.length > 0 ? str : '';
+  data = typeof (data) == 'object' && data !== null ? data : {};
+  // 9.2 Append the template keys to the data object
+  for (let keyName in config.templateGlobals) {
+    if (config.templateGlobals.hasOwnProperty(keyName)) {
+      data['global.' + keyName] = config.templateGlobals[keyName];
+    }
+  }
+  // 9.3 INSERT THE data key value into the string
+  for (let key in data) {
+    if (data.hasOwnProperty(key) && typeof (data[key]) == 'string') {
+      let replace = data[key];
+      let find = '{' + key + '}';
+      str = str.replace(find, replace);
+    }
+  }
+  return str;
+};
 // 10. GET STATIC ASSETS: Get the contents of the static/public assets
-
+helpers.getStaticAssets = (fileName, callback) => {
+  // 10.1 Check the type of the data
+  fileName = typeof (fileName) == 'string' &&
+    fileName.length > 0 ? fileName : false;
+  if (fileName) {
+    // 10.2 Fetch the assets
+    const publicDir = path.join(__dirname, '/../public/');
+    fs.readFile(publicDir + fileName, (err, data) => {
+      if (!err && data) {
+        callback(false, data);
+      } else {
+        callback('No file could be found');
+      }
+    });
+  } else {
+    callback('No file could be found');
+  }
+};
 // 11. Export the helpers
 module.exports = helpers;

@@ -24,7 +24,7 @@ lib.create = (dir, file, data, callback) => {
       // 3.3 Write data to the file and close it
       fs.writeFile(fileDescriptor, stringData, (err) => {
         if (!err) {
-          fs.close(fileDesciprot, (err) => {
+          fs.close(fileDescriptor, (err) => {
             if (!err) {
               callback(false);
             } else {
@@ -58,15 +58,15 @@ lib.read = (dir, file, callback) => {
 // 5. UPDATE: put new data to a file
 lib.update = (dir, file, data, callback) => {
   // 5.1 OPEN: file for writing
-  fs.open(lib.baseDir + dir + '/' + file + '.json', 'r+', (err, fileDesciptor) => {
-    if (!err && fileDesciptor) {
+  fs.open(lib.baseDir + dir + '/' + file + '.json', 'r+', (err, fileDescriptor) => {
+    if (!err && fileDescriptor) {
       // 5.2 Convert the data to a string
       const stringData = JSON.stringify(data);
       // 5.3 Truncate the file (in order to append new data)
-      fs.ftruncate(fileDesciptor, (err) => {
+      fs.ftruncate(fileDescriptor, (err) => {
         if (!err) {
           // 5.4 Write to a file and close it
-          fs.writeFile(fileDesciptor, stringData, (err) => {
+          fs.writeFile(fileDescriptor, stringData, (err) => {
             if (!err) {
               fs.close(fileDescriptor, (err) => {
                 if (!err) {
@@ -74,11 +74,11 @@ lib.update = (dir, file, data, callback) => {
                 } else {
                   callback('Could not close the file');
                 }
-              })
+              });
             } else {
               callback('Could not write to a file');
             }
-          })
+          });
         } else {
           callback('Error truncating file');
         }
@@ -87,7 +87,7 @@ lib.update = (dir, file, data, callback) => {
       callback('Could not open the file for updates, it may not exist yet');
     }
   });
-}
+};
 
 // 6. DELETE: the files will be deleted
 lib.delete = (dir, file, callback) => {
@@ -96,10 +96,10 @@ lib.delete = (dir, file, callback) => {
     if (!err) {
       callback(false);
     } else {
-      callback('Could not delete the file');
+      callback('Could not delete the file', err);
     }
   });
-}
+};
 
 // 7. LIST ALL: files in the directory
 lib.list = (dir, callback) => {

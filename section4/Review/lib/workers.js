@@ -30,14 +30,14 @@ workers.gatherAllChecks = () => {
         _data.read('checks', check, (err, originalCheckData) => {
           if (!err && originalCheckData) {
             // 3.4 Validate the check data
-            workes.validateCheckData(originalCheckData);
+            workers.validateCheckData(originalCheckData);
           } else {
-            debug(`Error reading the check data`);
+            debug('Error reading the check data');
           }
         });
       });
     } else {
-      debug(`Error reading one of the checks data`);
+      debug('Error reading one of the checks data');
     }
   });
 };
@@ -89,9 +89,9 @@ workers.validateCheckData = (originalCheckData) => {
     originalCheckData.successCodes &&
     originalCheckData.timeoutSeconds
   ) {
-    workers.preformCheck(originalCheckData);
+    workers.performCheck(originalCheckData);
   } else {
-    debug(`Error: One of the checks data is not properly formatted`);
+    debug('Error: One of the checks data is not properly formatted');
   }
 };
 
@@ -100,7 +100,7 @@ workers.performCheck = (originalCheckData) => {
   // 5.1 Set the initial check outcome
   let checkOutcome = {
     'error': false,
-    'responseCode': false;
+    'responseCode': false
   };
   // 5.2 Indicate that the outcome is not sent
   let outcomeSent = false;
@@ -180,10 +180,10 @@ workers.processCheckOutcome = (originalCheckData, checkOutcome) => {
       if (alertWarranted) {
         workers.alertUserToStatusChange(newCheckData);
       } else {
-        debug(`Check outcome has not changed, no alert needed`);
+        debug('Check outcome has not changed, no alert needed');
       }
     } else {
-      debug(`Error trying to save the updates to one of the checks`);
+      debug('Error trying to save the updates to one of the checks');
     }
   });
 }
@@ -218,9 +218,9 @@ workers.log = (originalCheckData, checkOutcome, state, alertWarranted, timeOfChe
   // 8.4 Append the log string to the file
   _logs.append(logFileName, logString, (err) => {
     if (!err) {
-      debug(`Logging to file succeded`);
+      debug('Logging to file succeded');
     } else {
-      debug(`Logging to file failed`);
+      debug('Logging to file failed');
     }
   });
 };
@@ -229,7 +229,7 @@ workers.log = (originalCheckData, checkOutcome, state, alertWarranted, timeOfChe
 workers.loop = () => {
   setInterval(() => {
     workers.gatherAllChecks();
-  }, 1000 * 60);
+  }, 1000 * 60)
 };
 
 // 10. ROTATE AND COMPRESS FILES
@@ -247,9 +247,9 @@ workers.rotateLogs = () => {
             // 10.4 Truncate the logs
             _logs.truncate(logId, (err) => {
               if (!err) {
-                debug(`Success truncating the log file`);
+                debug('Success truncating the log file');
               } else {
-                debug(`Error truncating the log file`);
+                debug('Error truncating the log file');
               }
             });
           } else {
@@ -257,6 +257,8 @@ workers.rotateLogs = () => {
           }
         });
       });
+    } else {
+      debug('Error could not find any logs to rotate');
     }
   });
 };
@@ -265,7 +267,7 @@ workers.rotateLogs = () => {
 workers.logRotationLoop = () => {
   setInterval(() => {
     workers.rotateLogs();
-  }, 1000 * 60 * 60 * 24);
+  }, 1000 * 60 * 60 * 24)
 };
 
 

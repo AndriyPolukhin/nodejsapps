@@ -11,12 +11,12 @@ const zlib = require('zlib'); // compress files
 // 2. CONTAINER: for the logs function
 const lib = {};
 // base directory
-lib.baseDir = path.join(__dirname, '../.logs/');
+lib.baseDir = path.join(__dirname, '/../.logs/');
 
 // 3. APPEND: stirng into files. Create file if it do not exist yet
 lib.append = (file, str, callback) => {
   // 3.1 Open the file to append
-  fs.open(lib.baseDir + file + '.logs', 'a', (err, fileDescriptor) => {
+  fs.open(lib.baseDir + file + '.log', 'a', (err, fileDescriptor) => {
     if (!err && fileDescriptor) {
       // 3.2 Append the str to a file and close it
       fs.appendFile(fileDescriptor, str + '\n', (err) => {
@@ -27,7 +27,7 @@ lib.append = (file, str, callback) => {
             } else {
               callback('Error closing the file');
             }
-          })
+          });
         } else {
           callback('Error appending to file');
         }
@@ -104,7 +104,7 @@ lib.compress = (logId, newFileId, callback) => {
       callback(err);
     }
   });
-}
+};
 
 // 6. DECOMPRESSS: the content of the '.gz.b64' file to a '.log' file
 lib.decompress = (fileId, callback) => {

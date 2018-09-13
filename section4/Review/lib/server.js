@@ -117,7 +117,7 @@ server.unifiedServer = (req, res) => {
       }
       if (contentType == 'plain') {
         res.setHeader('Content-Type', 'text/plain');
-        payloadString = typeof (payload) !== 'undefined' ? payload : '';
+        payloadString = typeof (payload) !== 'string' ? payload : '';
       }
       // 7.7.4.4 CONTENT COMMON: parts
       res.writeHead(statusCode);
@@ -158,11 +158,11 @@ server.router = {
 server.init = () => {
   // 7.1 Start the HTTP SERVER
   server.httpServer.listen(config.httpPort, () => {
-    console.log('\x1b[36m%s\x1b[0m', `Server is running on port: ${config.httpPort} in ${config.envName} mode.`);
+    console.log('\x1b[36m%s\x1b[0m', `Server is running on port: ${config.httpPort} in ${config.envName} mode`);
   });
   // 7.2 Start the HTTPS SERVER
   server.httpsServer.listen(config.httpsPort, () => {
-    console.log('\x1b[35m%s\x1b[0m', `Server is running on port: ${config.httpsPort} in ${config.envName} mode.`);
+    console.log('\x1b[35m%s\x1b[0m', `Server is running on port: ${config.httpsPort} in ${config.envName} mode`);
   });
 }
 
