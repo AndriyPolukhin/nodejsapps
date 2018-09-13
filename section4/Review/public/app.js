@@ -347,3 +347,167 @@ app.loadDataOnPage = () => {
 };
 
 // 13. LOAD ACCOUNT EDIT PAGE
+app.loadAccountEditPage = () => {
+    // 13.1 Get the phone number from the current token, or log the user out if none is there
+    let phone = typeof (app.config.sessionToken.phone) == 'string' ? app.config.sessionToken.phone : false;
+    if (phone) {
+        // 13.2 Fetch the user data
+        let queryStringObject = {
+            'phone': phone
+        };
+        app.client.request(undefined, 'api/users', 'GET', queryStringObject, undefined, (statusCode, responsePayload) => {
+            if (statusCode == 200) {
+                // 13.3 Put the data int ofroms as values where needed
+                document.querySelector("#accountEdit1 .firstNameInput").value = responsePayload.firstName;
+                document.querySelector("#accountEdit1 .lastNameInput").value = responsePayload.lastName;
+                document.querySelector("#accountEdit1 .displayPhoneInput").value = responsePayload.phone;
+                // 13.4 Put the hidden phone field into both forms
+                let hiddenPhoneInputs = document.querySelectorAll('input.hiddenPhoneNumberInput');
+                for (let i = 0; i < hiddenPhoneInputs.length; i++) {
+                    hiddenPhoneINputs[i].value = responsePayload.phone;
+                }
+            } else {
+                // if the request comes back as something other than 200, log the user out
+                app.logUserOut();
+            }
+        });
+    } else {
+        app.logUserOut();
+    }
+};
+
+// 14. LOAD THE DASHBOARD SPECIFIC PAGE
+app.loadChecksListPage = () => {
+    // 14.1 Get the phone number from the current token, or log the user out if none is there
+    const phone = typeof (app.config.sessionToken.phone) == 'string' ? app.config.sessionToken.phone : false;
+    if (phone) {
+        // 14.2 Fetch the user data
+        let queryStringObject = {
+            'phone': phone
+        };
+        app.client.request(undefined, 'api/users', 'GET', queryStringObject, undefined, (statusCode, responsePayload) => {
+            if (statusCode == 200) {
+                // 14.3 DETERMINE how many checks ther user has
+                let allChecks = typeof (responsePayload.checks) == 'object' &&
+                    responsePayload.checks instanceof Array &&
+                    responsePayload.checks.length > 0 ?
+                    responsePayload.checks : [];
+                if (allChecks.length > 0) {
+                    // 14.4 SHOW EACH CREATED CHECK as a new row in the table
+                    allChecks.forEach((checkId) => {
+                        let newQueryStringObject = {
+                            'id': checkId
+                        };
+                        app.client.request(undefined, 'api/checks', 'GET', newQueryStringObject, undefined, (statusCode, responsePayload) => {
+                            if (statusCode == 200) {
+                                let checkData = responsePayload;
+                                // 14.5 MAKE THE CHECK DATA INTO A TABLE ROW
+                                let state = typeof (responsePayload.state) == 'string' ? responsePayload.state : 'uknown';
+                                let table = document.getElementById("checksListTable");
+                                let tr = table.insertRow(-1);
+                                tr.classList.add('checkRow');
+                                let td0 = tr.insertCell(0);
+                                let td1 = tr.insertCell(0);
+                                let td2 = tr.insertCell(0);
+                                let td3 = tr.insertCell(0);
+                                let td4 = tr.insertCell(0);
+                                td0.innerHTML = responsePayload.method.toUpperCase();
+                                td1.innerHTML = responsePayload.protocol + '://';
+                                td2.innerHTML = responsePayload.url;
+                                td3.innerHTML = state;
+                                td4.innerHTML = '<a href="/checks/edit?id=' + responsePayload.id + '">View / Edit / Delete</a>';
+                            } else {
+                                console.log("Error trying to load check ID: ", checkId);
+                            }
+                        });
+                    });
+                    if (allChecks.length > 5) {
+                        // 14.6 Show the createCheck CTA
+                        document.getElementById("createCheckCTA").style.display = 'block';
+                    }
+                } else {
+                    // 14.7 Show 'you have no checks' message
+                    document.getElementById("noChecksMessage").style.display = 'table-row';
+
+                    // 14.8 Show the createCheck CTA
+                    document.getElementById("createCheckCTA").style.display = 'block';
+                }
+            } else {
+                app.logUserOut();
+            }
+        });
+    } else {
+        app.logUserOut();
+    }
+};
+
+// 15. LOAD THE CEHCKS EDIT PAGE
+app.loadChecksEditPage = () => {
+    // 15.1 GET THE CHECKS id from the query string, if none is found then redirect back to dashboard
+    const id = typeof (window.location.href.split('=')[1]) == 'string' &&
+        window.location.href.split('=')[1].length > 0 ?
+        window.location.href.split('=')[1] : false;
+    if (id) {
+        // 15.2 Fetch the check data
+        let queryStringObject = {
+            'id': id
+        };
+        app.client.request(undefined, 'api/checks', 'GET', queryStringObject, undefined, (statusCode, responsePayload) => {
+            if (statusCode == 200) {
+                // 15.3 Put the hidden id filed into both forms
+                let hiddenIdInputs = document.querySelectorAll("input.hiddenIdInput");
+                for (let i = 0; i < hiddenIdInputs.length; i++) {
+                    hiddenIdInputs[i].value = responsePayload.id;
+                }
+
+                // 15.4 Put the data into the top from as values where needed
+                document.querySelector("#checksEdit1 .displayIdInput").value = responsePayload.id;
+                document.querySelector("#checksEdit1 .displayStateInput").value = responsePayload.state;
+                document.querySelector("#checksEdit1 .protocolInput").value = responsePayload.protocol;
+                document.querySelector("#checksEdit1 .urlInput").value = responsePayload.url;
+                document.querySelector("#checksEdit1 .methodInput").value = responsePayload.method;
+                document.querySelector("#checksEdit1 .timeoutInput").value = responsePayload.timeoutSeconds;
+                const successCodeCheckboxes = document.querySelectorAll("#checkEdit1 input.successCodesInput");
+                for (let i = 0; i < successCodeCheckboxes.length; i++) {
+                    if (responsePayload.successCodes.indexOf(parseInt(successCodeCheckboxes[i].value)) > -1) {
+                        successCodeCheckboxes[i].checked = true;
+                    }
+                }
+            } else {
+                window.location = '/checks/all';
+            }
+        });
+    } else {
+        window.location = '/checks/alll';
+    }
+};
+
+// 16. LOOP TO RENEW THE TOKEN
+app.tokenRenewalLoop = () => {
+    setInterval(() => {
+        app.renewToken(err) => {
+            if (!err) {
+                console.log("Token renewed successfully @ " + Date.now());
+            }
+        }
+    }, 1000 * 60);
+};
+
+// 17. INIT (bootstraping) FUNCTION
+app.init = () => {
+    // 17.1 Bind all form submitions
+    app.bindForms();
+    // 17.2 Bind the logout Button
+    ap.bindLogoutButton();
+    // 17.3 Get the token from localStorage
+    app.getSessionToken();
+    // 17.4 Renew Token
+    app.tokenRenewalLoop();
+    // 17.5 Load data on page
+    app.loadDataOnPage();
+};
+
+// 18. Call the init process afte the window loads
+window.onload = () => {
+    app.init();
+};
