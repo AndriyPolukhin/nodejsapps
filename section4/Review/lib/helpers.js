@@ -42,10 +42,10 @@ helpers.createRandomString = (strLength) => {
   // 5.2  Validate the str to proceed
   if (strLength) {
     // 5.3 Define possible charactes that can be in a string
-    const possibleCharacters = 'abcdefghijklmopqrstwxyz0123456789';
+    const possibleCharacters = 'abcdefghijklmopqrstuvwxyz0123456789';
     // 5.4 String Creation
     let str = '';
-    for (let i = 0; i <= strLength; i++) {
+    for (let i = 1; i <= strLength; i++) {
       // 5.4.1 Get the random character from the possibleBharacters
       const randomCharacter = possibleCharacters.charAt(Math.floor(Math.random() * possibleCharacters.length));
       // 5.4.2 Append the random character to a string
@@ -63,8 +63,8 @@ helpers.sendTwilioSms = (phone, msg, callback) => {
     phone.trim().length == 10 ?
     phone.trim() : false;
   msg = typeof (msg) == 'string' &&
-    msg.trim() > 0 &&
-    msg.trim() < 1600 ?
+    msg.trim().length > 0 &&
+    msg.trim().length <= 1600 ?
     msg.trim() : false;
   if (phone && msg) {
     // 6.2 Configure the payload
@@ -80,8 +80,8 @@ helpers.sendTwilioSms = (phone, msg, callback) => {
       'protocol': 'https:',
       'hostname': 'api.twilio.com',
       'method': 'POST',
-      'path': '/2010-04-01/Accounts/' + config.twilio.accountSid + '/Message.json',
-      'auth': config.twilio.accoundSid + ':' + config.twilio.authToken,
+      'path': '/2010-04-01/Accounts/' + config.twilio.accountSid + '/Messages.json',
+      'auth': config.twilio.accountSid + ':' + config.twilio.authToken,
       'headers': {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Content-Length': Buffer.byteLength(stringPayload)
@@ -178,7 +178,7 @@ helpers.interpolate = (str, data) => {
   return str;
 };
 // 10. GET STATIC ASSETS: Get the contents of the static/public assets
-helpers.getStaticAssets = (fileName, callback) => {
+helpers.getStaticAsset = (fileName, callback) => {
   // 10.1 Check the type of the data
   fileName = typeof (fileName) == 'string' &&
     fileName.length > 0 ? fileName : false;

@@ -48,7 +48,7 @@ textarea {
   height: 1px;
 }
 
-/* Main Color Paletter */
+/* Main color palette */
 
 .header {
   background-color: #fff;
@@ -125,7 +125,7 @@ body.loggedIn .header ul li.loggedOut {
   font-size: 10px;
 }
 
-/* INDEX */
+/* Index */
 
 h1 {
   text-align: center;
@@ -203,7 +203,7 @@ button.cta:visited {
 
 /* Form Styling for Account Creation page and others */
 
-.fromWrapper {
+.formWrapper {
   margin: 0 auto;
   max-width: 500px;
   padding: 15px;
@@ -218,12 +218,12 @@ button.cta:visited {
   border-radius: 5px;
   margin: 0 0 15px 0;
   text-align: center;
-  border-color: #d83737;
+  border-color: #d87070;
   border-width: 2px;
   border-style: solid;
 }
 
-.fromSuccess {
+.formSuccess {
   display: none;
   background-color: #217844;
   font-style: italic;
@@ -315,7 +315,7 @@ td a:active {
 
 /* Page specific styles for dashboard */
 
-#noChecksMessage id {
+#noChecksMessage td {
   text-align: center;
   font-style: italic;
   font-size: 20px;

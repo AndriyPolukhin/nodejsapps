@@ -92,7 +92,7 @@ handlers.accountCreate = (data, callback) => {
 };
 
 // 3. SESSION CREATE HANDLER
-helpers.sessionCreate = (data, callback) => {
+handlers.sessionCreate = (data, callback) => {
   // 3.1 REJECT REQUEST: all but the GET
   if (data.method == 'get') {
     // 3.2 Prepare data for interpolation
@@ -306,7 +306,7 @@ handlers.public = (data, callback) => {
     let trimmedAssetName = data.trimmedPath.replace('public/', '').trim();
     if (trimmedAssetName) {
       // 10.3 Fetch the asset
-      helpers.getStaticAssets(trimmedAssetName, (err, data) => {
+      helpers.getStaticAsset(trimmedAssetName, (err, data) => {
         if (!err && data) {
           // 10.4 Determine the content Type of the asset
           let contentType = 'plain';
@@ -342,7 +342,7 @@ handlers.favicon = (data, callback) => {
   // 11.1 REJECT REQUEST: all but the GET
   if (data.method == 'get') {
     // 11.2 Fetch the favicon
-    helpers.getStaticAssets('favicon.ico', (err, data) => {
+    helpers.getStaticAsset('favicon.ico', (err, data) => {
       if (!err && data) {
         // 11.3 Return the data
         callback(200, data, 'favicon');
@@ -881,7 +881,7 @@ handlers._checks.get = (data, callback) => {
     _data.read('checks', id, (err, checkData) => {
       if (!err && checkData) {
         // 3.4.3 Verify the provided token
-        const token = typeof (data.headers.token) == 'string' ? data.haeder.token : false;
+        const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
         handlers._tokens.verifyToken(token, checkData.userPhone, (tokenIsValid) => {
           if (tokenIsValid) {
             // 3.4.4 Return the check data to the user
@@ -932,10 +932,10 @@ handlers._checks.put = (data, callback) => {
     // 3.5.3 Check for optional data
     if (protocol || url || method || successCodes || timeoutSeconds) {
       // 3.5.4 Fetch the check data
-      _date.read('checks', id, (err, checkData) => {
+      _data.read('checks', id, (err, checkData) => {
         if (!err && checkData) {
           // 3.5.5 Verify the provided token
-          const token = typeof (data.headers.token) == 'string' ? data.header.token : false;
+          const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
           handlers._tokens.verifyToken(token, checkData.userPhone, (tokenIsValid) => {
             if (tokenIsValid) {
               // 3.5.6 Update the check data with optional data

@@ -8,7 +8,7 @@ let app = {};
 
 // 2. CONFIG OBJECT
 app.config = {
-    sessionToken: false;
+    'sessionToken': false
 };
 
 // 3. AJAX CLIENT for the REST API
@@ -17,12 +17,12 @@ app.client = {};
 // 3.1 ITERFACE: for the api calls
 app.client.request = (headers, path, method, queryStringObject, payload, callback) => {
     // 3.1.1 Type check of the parameters
-    headers = typeof (headers) === 'object' && headers !== null ? headers : {};
-    path = typeof (path) === 'string' ? path : '/';
-    method = typeof (method) === 'string'
+    headers = typeof (headers) == 'object' && headers !== null ? headers : {};
+    path = typeof (path) == 'string' ? path : '/';
+    method = typeof (method) == 'string'
         && ['POST', 'GET', 'PUT', 'DELETE'].indexOf(method.toUpperCase()) > -1 ?
         method.toUpperCase() : 'GET';
-    queryStringObject = typeof (queryStringObject) === 'object' &&
+    queryStringObject = typeof (queryStringObject) == 'object' &&
         queryStringObject !== null ?
         queryStringObject : {};
     payload = typeof (payload) == 'object' &&
@@ -35,9 +35,9 @@ app.client.request = (headers, path, method, queryStringObject, payload, callbac
     for (let queryKey in queryStringObject) {
         // 3.1.3 Check if it's a real key
         if (queryStringObject.hasOwnProperty(queryKey)) {
-            conunter++;
+            counter++;
             // 3.1.4 If there's already a parameter, add next one with a '&'
-            if (counter > 0) {
+            if (counter > 1) {
                 requestUrl += '&';
             }
             // 3.1.5 Add the key value
@@ -47,17 +47,17 @@ app.client.request = (headers, path, method, queryStringObject, payload, callbac
     // 3.1.5 Form the http request as a json type
     let xhr = new XMLHttpRequest();
     xhr.open(method, requestUrl, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader("Content-type", "application/json");
 
     // 3.1.6 Add all the other headers to the request if any
     for (let headerKey in headers) {
-        if (headres.hasOwnProperty(headerKey)) {
+        if (headers.hasOwnProperty(headerKey)) {
             xhr.setRequestHeader(headerKey, headers[headerKey]);
         }
     }
     // 3.1.7 If there's a session token, add it to the header
     if (app.config.sessionToken) {
-        xhr.setRequestHeader('token', app.config.sessionToken.id);
+        xhr.setRequestHeader("token", app.config.sessionToken.id);
     }
     // 3.1.8 Handler the response of the request
     xhr.onreadystatechange = () => {
@@ -83,7 +83,7 @@ app.client.request = (headers, path, method, queryStringObject, payload, callbac
 
 // 4. BIND THE LOGOUT BUTTON
 app.bindLogoutButton = () => {
-    documnet.getElementById("logoutButton").addEventListener("click", (e) => {
+    document.getElementById("logoutButton").addEventListener("click", (e) => {
         // 4.1 Stop it from redirecting
         e.preventDefault();
 
@@ -115,12 +115,12 @@ app.logUserOut = (redirectUser) => {
 };
 
 // 6. BIND FORMS
-app.bindForms = function() {
+app.bindForms = function () {
     if (document.querySelector("form")) {
         // 6.1 SELECT ALL FORMS and addEventListener
         const allForms = document.querySelectorAll("form");
         for (let i = 0; i < allForms.length; i++) {
-            allForms[i].addEventListener("submit", function(e) {
+            allForms[i].addEventListener("submit", function (e) {
                 // 6.2 Set the parameters
                 e.preventDefault();
                 let formId = this.id;
@@ -129,15 +129,16 @@ app.bindForms = function() {
 
                 // 6.3 HIDE ERROR MESSAGE
                 document.querySelector(`#${formId} .formError`).style.display = 'none';
+
                 // 6.4 HIDE SUCCESS MESSAGE
-                if (document.querySelector(`#${formId} .formSuccess`)) {
-                    document.querySelector(`#${formId} .formSuccess`).style.display = 'none';
+                if (document.querySelector("#" + formId + " .formSuccess")) {
+                    document.querySelector("#" + formId + " .formSuccess").style.display = 'none';
                 }
                 // 6.5 TURN INPUT INTO PAYLOAD
                 let payload = {};
                 let elements = this.elements;
                 for (let i = 0; i < elements.length; i++) {
-                    if (elements[i].type !== "submit") {
+                    if (elements[i].type !== 'submit') {
                         // 6.5.1 Determine the class of element and set it accoringly
                         const classOfElement = typeof (elements[i].classList.value) == 'string' &&
                             elements[i].classList.value.length > 0 ? elements[i].classList.value : '';
@@ -164,7 +165,7 @@ app.bindForms = function() {
                                 if (elementIsChecked) {
                                     payload[nameOfElement] = typeof (payload[nameOfElement]) == 'object' &&
                                         payload[nameOfElement] instanceof Array ?
-                                        payload[nameOfElmeent] : [];
+                                        payload[nameOfElement] : [];
                                     payload[nameOfElement].push(valueOfElement);
                                 }
                             } else {
@@ -173,21 +174,25 @@ app.bindForms = function() {
                         }
                     }
                 }
+
+
                 // 6.6 If the method is DELETE, the payload sholud be a queryStringObject instead
                 const queryStringObject = method == 'DELETE' ? payload : {};
+
                 app.client.request(undefined, path, method, queryStringObject, payload, (statusCode, responsePayload) => {
                     // 6.6.1 Display an Error on the form if needed
                     if (statusCode !== 200) {
                         if (statusCode == 403) {
                             app.logUserOut();
                         } else {
+
                             // 6.6.2 Tru to get the error from the api, or set default one
-                            const error = typeof (responsePayload.Error) == 'string' ?
+                            let error = typeof (responsePayload.Error) == 'string' ?
                                 responsePayload.Error : 'An error has occured, please tru again';
                             // 6.6.3 Set the formError field with the error text
-                            document.querySelector(`#${formId} .fromError`).innerHTML = error;
+                            document.querySelector("#" + formId + " .formError").innerHTML = error;
                             // 6.6.4 Unhide the form error field on the form
-                            document.querySelector(`#${formId.formError}`).style.display = 'block';
+                            document.querySelector("#" + formId + " .formError").style.display = 'block';
                         }
                     } else {
                         // 6.6.5 if successful, send to form response processor
@@ -215,8 +220,8 @@ app.formResponseProcessor = (formId, requestPayload, responsePayload) => {
             // 7.4.1 Display an error on the form if needed
             if (newStatusCode !== 200) {
                 // 7.4.2 Set the formError field with the error text
-                document.querySelector(`#${formId} .fromError`).innerHTML = 'Sorry, an error has occured. Please try again';
-                document.querySelector(`#${formId} .formError`).style.display = 'block';
+                document.querySelector("#" + formId + " .formError").innerHTML = 'Sorry, an error has occured. Please try again';
+                document.querySelector("#" + formId + " .formError").style.display = 'block';
             } else {
                 // 7.4.3 Set the Session token and redirect to dashboard
                 app.setSessionToken(newResponsePayload);
@@ -232,7 +237,7 @@ app.formResponseProcessor = (formId, requestPayload, responsePayload) => {
     // 7.6 If forms saved successfully and they have success messages, show them
     const formsWithSuccessMessages = ['accountEdit1', 'accountEdit2'];
     if (formsWithSuccessMessages.indexOf(formId) > -1) {
-        document.querySelector(`#${formId} .formSuccess`).style.display = 'block';
+        document.querySelector("#" + formId + " .formSuccess").style.display = 'block';
     }
     // 7.7 If user just deleted their account, redirect them to the account-delte page
     if (formId == 'accountEdit3') {
@@ -241,7 +246,7 @@ app.formResponseProcessor = (formId, requestPayload, responsePayload) => {
     }
     // 7.8 If the user just create a new check successfully, redirect back to the dashboard
     if (formId == 'checksCreate') {
-        window.location - '/checks/all';
+        window.location = '/checks/all';
     }
     // 7.9 If the user just deleted a check, redirect them to the dashboard
     if (formId == 'checksEdit2') {
@@ -257,7 +262,7 @@ app.getSessionToken = () => {
             const token = JSON.parse(tokenString);
             app.config.sessionToken = token;
             if (typeof (token) == 'object') {
-                app.setLoggedinClass(true);
+                app.setLoggedInClass(true);
             } else {
                 app.setLoggedInClass(false);
             }
@@ -272,9 +277,9 @@ app.getSessionToken = () => {
 app.setLoggedInClass = (add) => {
     let target = document.querySelector("body");
     if (add) {
-        target.classList.add('LoggedIn');
+        target.classList.add('loggedIn');
     } else {
-        target.classList.remove('LoggedIn');
+        target.classList.remove('loggedIn');
     }
 };
 
@@ -301,7 +306,7 @@ app.renewToken = (callback) => {
             'id': currentToken.id,
             'extend': true
         };
-        app.client.request(undefined, 'api/tokens', 'PUT', undefined, pyaload, (statusCode, responsePayload) => {
+        app.client.request(undefined, 'api/tokens', 'PUT', undefined, payload, (statusCode, responsePayload) => {
             // 11.3 Display an error on the form if needed
             if (statusCode == 200) {
                 // 11.4 GETTHE NEW TOKEN DETAILS
@@ -312,7 +317,7 @@ app.renewToken = (callback) => {
                         app.setSessionToken(responsePayload);
                         callback(false);
                     } else {
-                        app.setSessionToken(fales);
+                        app.setSessionToken(false);
                         callback(true);
                     }
                 });
@@ -361,10 +366,11 @@ app.loadAccountEditPage = () => {
                 document.querySelector("#accountEdit1 .firstNameInput").value = responsePayload.firstName;
                 document.querySelector("#accountEdit1 .lastNameInput").value = responsePayload.lastName;
                 document.querySelector("#accountEdit1 .displayPhoneInput").value = responsePayload.phone;
+
                 // 13.4 Put the hidden phone field into both forms
-                let hiddenPhoneInputs = document.querySelectorAll('input.hiddenPhoneNumberInput');
+                let hiddenPhoneInputs = document.querySelectorAll("input.hiddenPhoneNumberInput");
                 for (let i = 0; i < hiddenPhoneInputs.length; i++) {
-                    hiddenPhoneINputs[i].value = responsePayload.phone;
+                    hiddenPhoneInputs[i].value = responsePayload.phone;
                 }
             } else {
                 // if the request comes back as something other than 200, log the user out
@@ -402,18 +408,18 @@ app.loadChecksListPage = () => {
                             if (statusCode == 200) {
                                 let checkData = responsePayload;
                                 // 14.5 MAKE THE CHECK DATA INTO A TABLE ROW
-                                let state = typeof (responsePayload.state) == 'string' ? responsePayload.state : 'uknown';
                                 let table = document.getElementById("checksListTable");
                                 let tr = table.insertRow(-1);
                                 tr.classList.add('checkRow');
                                 let td0 = tr.insertCell(0);
-                                let td1 = tr.insertCell(0);
-                                let td2 = tr.insertCell(0);
-                                let td3 = tr.insertCell(0);
-                                let td4 = tr.insertCell(0);
+                                let td1 = tr.insertCell(1);
+                                let td2 = tr.insertCell(2);
+                                let td3 = tr.insertCell(3);
+                                let td4 = tr.insertCell(4);
                                 td0.innerHTML = responsePayload.method.toUpperCase();
                                 td1.innerHTML = responsePayload.protocol + '://';
                                 td2.innerHTML = responsePayload.url;
+                                let state = typeof (responsePayload.state) == 'string' ? responsePayload.state : 'unknown';
                                 td3.innerHTML = state;
                                 td4.innerHTML = '<a href="/checks/edit?id=' + responsePayload.id + '">View / Edit / Delete</a>';
                             } else {
@@ -421,7 +427,8 @@ app.loadChecksListPage = () => {
                             }
                         });
                     });
-                    if (allChecks.length > 5) {
+
+                    if (allChecks.length < 5) {
                         // 14.6 Show the createCheck CTA
                         document.getElementById("createCheckCTA").style.display = 'block';
                     }
@@ -441,6 +448,7 @@ app.loadChecksListPage = () => {
     }
 };
 
+
 // 15. LOAD THE CEHCKS EDIT PAGE
 app.loadChecksEditPage = () => {
     // 15.1 GET THE CHECKS id from the query string, if none is found then redirect back to dashboard
@@ -454,6 +462,7 @@ app.loadChecksEditPage = () => {
         };
         app.client.request(undefined, 'api/checks', 'GET', queryStringObject, undefined, (statusCode, responsePayload) => {
             if (statusCode == 200) {
+
                 // 15.3 Put the hidden id filed into both forms
                 let hiddenIdInputs = document.querySelectorAll("input.hiddenIdInput");
                 for (let i = 0; i < hiddenIdInputs.length; i++) {
@@ -467,7 +476,7 @@ app.loadChecksEditPage = () => {
                 document.querySelector("#checksEdit1 .urlInput").value = responsePayload.url;
                 document.querySelector("#checksEdit1 .methodInput").value = responsePayload.method;
                 document.querySelector("#checksEdit1 .timeoutInput").value = responsePayload.timeoutSeconds;
-                const successCodeCheckboxes = document.querySelectorAll("#checkEdit1 input.successCodesInput");
+                const successCodeCheckboxes = document.querySelectorAll("#checksEdit1 input.successCodesInput");
                 for (let i = 0; i < successCodeCheckboxes.length; i++) {
                     if (responsePayload.successCodes.indexOf(parseInt(successCodeCheckboxes[i].value)) > -1) {
                         successCodeCheckboxes[i].checked = true;
@@ -478,18 +487,18 @@ app.loadChecksEditPage = () => {
             }
         });
     } else {
-        window.location = '/checks/alll';
+        window.location = '/checks/all';
     }
 };
 
 // 16. LOOP TO RENEW THE TOKEN
 app.tokenRenewalLoop = () => {
     setInterval(() => {
-        app.renewToken(err) => {
+        app.renewToken((err) => {
             if (!err) {
                 console.log("Token renewed successfully @ " + Date.now());
             }
-        }
+        });
     }, 1000 * 60);
 };
 
@@ -497,12 +506,16 @@ app.tokenRenewalLoop = () => {
 app.init = () => {
     // 17.1 Bind all form submitions
     app.bindForms();
+
     // 17.2 Bind the logout Button
-    ap.bindLogoutButton();
+    app.bindLogoutButton();
+
     // 17.3 Get the token from localStorage
     app.getSessionToken();
+
     // 17.4 Renew Token
     app.tokenRenewalLoop();
+
     // 17.5 Load data on page
     app.loadDataOnPage();
 };

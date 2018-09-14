@@ -78,7 +78,7 @@ lib.compress = (logId, newFileId, callback) => {
           fs.open(lib.baseDir + destFile, 'wx', (err, fileDescriptor) => {
             if (!err && fileDescriptor) {
               // 5.5 WRITE: to a file
-              fs.writFile(fileDescriptor, buffer.toString('base64'), (err) => {
+              fs.writeFile(fileDescriptor, buffer.toString('base64'), (err) => {
                 if (!err) {
                   // 5.6 CLOSE: the file
                   fs.close(fileDescriptor, (err) => {

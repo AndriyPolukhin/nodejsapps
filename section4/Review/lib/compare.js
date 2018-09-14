@@ -1,1052 +1,534 @@
 /*
-* This are the Request handlers
+* Front End Logic for the application
 *
 */
 
-// 1. Dependencies
-const _data = require('./data');
-const helpers = require('./helpers');
-const config = require('./config');
+// 1. Container for the front-end application
+let app = {};
 
-// 2. Handlers Container
-const handlers = {};
-
-// COMMON HELPERS:
-// 2.1 Ping handlers
-handlers.ping = (data, callback) => {
-  callback(200);
+// 2. Config object
+app.config = {
+  sessionToken: false
 };
 
-// 2.2 Not found handlers
-handlers.notFound = (data, callback) => {
-  callback(404);
-};
+// 3. Ajax Client for the Restful API
+app.client = {};
 
-/*
-*  I. HTML API HANDLERS
-*
-*/
+// 3.1 Interface for making API calls
+app.client.request = (headers, path, method, queryStringObject, payload, callback) => {
+  // 3.1.1 Setting default to the parameters
+  headers = typeof (headers) === 'object' && headers !== null ? headers : {};
+  path = typeof (path) === 'string' ? path : '/';
+  method = typeof (method) === 'string' && ['POST', 'GET', 'PUT', 'DELETE'].indexOf(method.toUpperCase()) > -1 ? method.toUpperCase() : 'GET';
+  queryStringObject = typeof (queryStringObject) === 'object' &&
+    queryStringObject !== null ? queryStringObject : {};
+  payload = typeof (payload) === 'object' && payload !== null ? payload : {};
+  callback = typeof (callback) === 'function' ? callback : false;
 
-// 1. INDEX HANDLERS
-handlers.index = (data, callback) => {
-  // 1.1  Reject any request that is not a GET
-  if (data.method == 'get') {
-    // 1.2 Prepare the data for interpolation
-    let templateData = {
-      'head.title': 'Uptime MOnitoring  - Made Simple',
-      'head.description': 'We offer free, simple uptime monitoring for HTTP/HTTPS sites of all kinds. When your site goes down, we\'ll send you a text to let you know',
-      'body.class': 'index'
+  // 3.1.2 For each query stirng parameter send, add it to the path
+  let requestUrl = `${path}?`;
+  let counter = 0;
+  for (let queryKey in queryStringObject) {
+    // 3.1.2-1 Check if it's a real key
+    if (queryStringObject.hasOwnProperty(queryKey)) {
+      counter++;
+      // 3.1.2-2 If at least one queryString parameter has, already been added, prepend new once with an '&'
+      if (counter > 1) {
+        requestUrl += '&';
+      }
+      // 3.1.2-3 Add the key value
+      requestUrl += `${queryKey}=${queryStringObject[queryKey]}`;
     }
-
-    // 1.3 Read in the template as a string
-    helpers.getTemplate('index', templateData, (err, str) => {
-      if (!err && str) {
-        // 1.4 Add the universal header and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            // 1.5 Return the page as html
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-  } else {
-    callback(405, undefined, 'html');
   }
-}
 
-// 2. CREATE ACCOUNT HANDLER
-handlers.accountCreate = (data, callback) => {
-  // 2.1 Reject all the request that isn't a GET
-  if (data.method == 'get') {
-    // 2.2 Prepare data for interpolation
-    let templateData = {
-      'head.title': 'Create an Account',
-      'head.description': 'Signup is easy and only takes a few seconds',
-      'body.class': 'accountCreate'
-    };
-    // 2.3 Read in a template as a string
-    helpers.getTemplate('accountCreate', templateData, (err, str) => {
-      if (!err && str) {
-        // 2.4 Add the universal header and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-  } else {
-    callback(405, undefined, 'html');
-  }
-}
+  // 3.1.3 Form the http request as a json type
+  let xhr = new XMLHttpRequest();
+  xhr.open(method, requestUrl, true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
 
-// 3. CREATE SESSION HANDLER
-handlers.sessionCreate = (data, callback) => {
-  // 3.1 Reject all the request that isn't a GET
-  if (data.method == 'get') {
-    // 3.2 Prepare data for interpolation
-    let templateData = {
-      'head.title': 'Login to your Account',
-      'head.description': 'Please enter your phone number and password to access your account',
-      'body.class': 'sessionCreate'
-    };
-    // 3.3 Read in a template as a string
-    helpers.getTemplate('sessionCreate', templateData, (err, str) => {
-      if (!err && str) {
-        // 3.4 Add the universal header and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-  } else {
-    callback(405, undefined, 'html');
-  }
-}
-
-// 4. DELETED SESSION HANDLER
-handlers.sessionDeleted = (data, callback) => {
-  // 4.1 Reject any request that isn't a get
-  if (data.method == 'get') {
-    // 4.2 Prepare the data for interpolation
-    let templateData = {
-      'head.title': 'Logged Out',
-      'head.description': 'You have been logged out of your account',
-      'body.class': 'sessionDeleted'
-    };
-    // 4.3 Read in a template as a string
-    helpers.getTemplate('sessionDeleted', templateData, (err, str) => {
-      if (!err && str) {
-        //Add the universal header and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-  } else {
-    callback(405, undefined, 'html');
-  }
-}
-
-// 5. EDIT ACCOUNT HANDLER
-handlers.accountEdit = (data, callback) => {
-  // 5.1 Reject all that is not a get
-  if (data.method == 'get') {
-    // 5.2 Prepare the data for interpolation
-    let templateData = {
-      'head.title': 'Account Settings',
-      'body.class': 'accountEdit'
-    };
-    // 5.3 Get the template
-    helpers.getTemplate('accountEdit', templateData, (err, str) => {
-      if (!err && str) {
-        // 5.4 Add the univeresal header and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-  } else {
-    callback(405, undefined, 'html');
-  }
-}
-
-// 6. DELETE ACCOUNT HANDLER
-handlers.accountDeleted = (data, callback) => {
-  // 6.1 Reject All methods that aren't get
-  if (data.method == 'get') {
-    // 6.2 Prepare the data for interpolation
-    const templateData = {
-      'head.title': 'Account Deleted',
-      'head.description': 'Your account has been deleted.',
-      'body.class': 'accountDeleted'
-    };
-    // 6.3 Read in a template as a string
-    helpers.getTemplate('accountDeleted', templateData, (err, str) => {
-      if (!err && str) {
-        // 6.4 Add the universal header and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-  } else {
-    callback(405, undefined, 'html');
-  }
-};
-
-// 7. CREATE CHECK HANDLER
-handlers.checksCreate = (data, callback) => {
-  // 7.1 Reject all methods that aren't get
-  if (data.method == 'get') {
-    // 7.2 Prepare the data for interpolation
-    const templateData = {
-      'head.title': 'Create a new check',
-      'body.class': 'checksCreate'
-    };
-    // 7.3 Read in the template as a string
-    helpers.getTemplate('checksCreate', templateData, (err, str) => {
-      if (!err && str) {
-        // 7.4 Get the universal header and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-
-  } else {
-    callback(405, undefined, 'html');
-  }
-}
-
-// 8. DASHBOARD / CHECKS ALL HANDLER
-handlers.checksList = (data, callback) => {
-  // 8.1 Reject all request that isn't a GET
-  if (data.method == 'get') {
-    // 8.2 Prepare the data for interpolation
-    const templateData = {
-      'head.title': 'Dashboard',
-      'body.class': 'checksList'
-    };
-
-    // 8.3 Read in a tempalate as a string
-    helpers.getTemplate('checksList', templateData, (err, str) => {
-      if (!err && str) {
-        // 8.4 Add the universal header and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        });
-      } else {
-        callback(500, undefined, 'html');
-      }
-    });
-  } else {
-    callback(405, undefined, 'html');
-  }
-}
-
-// 9. EDIT THE CHECKS
-handlers.checksEdit = (data, callback) => {
-  // 9.1 Reject all request that isn't a GET
-  if (data.method == 'get') {
-    // 9.2 Prepare the data for interpolation
-    let templateData = {
-      'head.title': 'Checks Details',
-      'body.class': 'checksEdit'
-    };
-    // 9.3 Read in a tempalate as a string
-    helpers.getTemplate('checksEdit', templateData, (err, str) => {
-      if (!err && str) {
-        // 9.4 Add the universal header and footer
-        helpers.addUniversalTemplates(str, templateData, (err, str) => {
-          if (!err && str) {
-            callback(200, str, 'html');
-          } else {
-            callback(500, undefined, 'html');
-          }
-        })
-      } else {
-        callback(500, undefined, 'html');
-      }
-    })
-  } else {
-    callback(405, undefined, 'html');
-  }
-}
-
-
-
-/*
-*  II. STATIC ASSETS HANDLERS
-*
-*/
-
-// 2. Favicon handlers
-handlers.favicon = (data, callback) => {
-  // 2.1 Reject any method that isn't a GET
-  if (data.method == 'get') {
-    // 2.2 Server the favicon.
-    // Read in the favicon's data
-    helpers.getStaticAsset('favicon.ico', (err, data) => {
-      if (!err && data) {
-        // 2.2 Callback the data
-        callback(200, data, 'favicon');
-      } else {
-        callback(500);
-      }
-    });
-  } else {
-    callback(405);
-  }
-}
-
-// 3. Public Assets
-handlers.public = (data, callback) => {
-  // 3.1 Reject any method that isn't a GET
-  if (data.method == 'get') {
-    // 3.2 Get the file name that been requested
-    let trimmedAssetName = data.trimmedPath.replace('public/', '').trim();
-    // 3.3. Continue if there is a file
-    if (trimmedAssetName.length > 0) {
-      // 3.4 Read in the asset's data
-      helpers.getStaticAsset(trimmedAssetName, (err, data) => {
-        if (!err && data) {
-          // 3.5 What kind of asset the data has
-          // Determine the content type (default to plain text)
-          let contentType = 'plain';
-          if (trimmedAssetName.indexOf('.css') > -1) {
-            contentType = 'css';
-          }
-          if (trimmedAssetName.indexOf('.js') > -1) {
-            contentType = 'js';
-          }
-          if (trimmedAssetName.indexOf('.png') > -1) {
-            contentType = 'png';
-          }
-          if (trimmedAssetName.indexOf('.jpg') > -1) {
-            contentType = 'jpg';
-          }
-          if (trimmedAssetName.indexOf('.ico') > -1) {
-            contentType = 'favicon';
-          }
-
-          // 3.6 Callback the data
-          callback(200, data, contentType);
-        } else {
-          callback(404);
-        }
-      });
-    } else {
-      callback(404);
+  // 3.1.4 additional headers, should be added to request
+  for (let headerKey in headers) {
+    if (headers.hasOwnProperty(headerKey)) {
+      xhr.setRequestHeader(headerKey, headers[headerKey]);
     }
-  } else {
-    callback(405);
   }
-}
 
-/*
-*  III. JSON API HANDLERS
-*
-*/
-
-// 3. USER SERVICE
-handlers.users = (data, callback) => {
-  const acceptableMethods = ['post', 'get', 'put', 'delete'];
-  if (acceptableMethods.indexOf(data.method) > -1) {
-    handlers._users[data.method](data, callback);
-  } else {
-    callback(405);
+  // 3.1.5 If there's a session token set, add that as a header
+  if (app.config.sessionToken) {
+    xhr.setRequestHeader('token', app.config.sessionToken.id);
   }
-};
-// 3.1 Container for the users sub methods
-handlers._users = {};
 
-// 3.2. Handlers USER POST
-// @required data: firstName, lastName, phone, password, tosAgreement
-// @optional data: none
-handlers._users.post = (data, callback) => {
-  // 3.2.1 Check that all the fields are filled out
-  const firstName = typeof (data.payload.firstName) == 'string' &&
-    data.payload.firstName.trim().length > 0 ?
-    data.payload.firstName.trim() : false;
-  const lastName = typeof (data.payload.lastName) == 'string' &&
-    data.payload.lastName.trim().length > 0 ?
-    data.payload.lastName.trim() : false;
-  const phone = typeof (data.payload.phone) == 'string' &&
-    data.payload.phone.trim().length == 10 ?
-    data.payload.phone.trim() : false;
-  const password = typeof (data.payload.password) == 'string' &&
-    data.payload.password.trim().length > 0 ?
-    data.payload.password.trim() : false;
-  const tosAgreement = typeof (data.payload.tosAgreement) == 'boolean' &&
-    data.payload.tosAgreement == true ? true : false;
+  // 3.1.6 When the request returns handle the response
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      let statusCode = xhr.status;
+      let responseReturned = xhr.responseText;
 
-  if (firstName && lastName && phone && password && tosAgreement) {
-    // 3.2.2. Make user that the user doesn't exist
-    _data.read('users', phone, (err, data) => {
-      if (err) {
-        // 3.2.3 Hash the password
-        const hashedPassword = helpers.hash(password);
-        if (hashedPassword) {
-          // 3.2.4 Creat the user object
-          const userObject = {
-            'firstName': firstName,
-            'lastName': lastName,
-            'phone': phone,
-            'hashedPassword': hashedPassword,
-            'tosAgreement': true
-          };
-          // Store the user
-          _data.create('users', phone, userObject, (err) => {
-            if (!err) {
-              callback(200);
-            } else {
-              callback(500, { 'Error': 'Could not hash the user\'s password' });
-            }
-          })
-        } else {
-          callback(500, { 'Error': 'COuld not hash the user\'s password' });
+      // 3.1.7 Use callback if requested
+      if (callback) {
+        try {
+          const parsedResponse = JSON.parse(responseReturned);
+          callback(statusCode, parsedResponse);
+        } catch (e) {
+          callback(statusCode, false);
         }
-
-      } else {
-        callback(400, { 'Error': 'User with that phone number already exist' });
       }
-    })
-  } else {
-    callback(400, { 'Error': 'Missing Required Fields' });
-  }
-
-};
-
-// 3.3 Handlers USER GET
-// @required: phone
-// @optional: none
-// @todo: only let the authenticated users access their object
-handlers._users.get = (data, callback) => {
-  // 3.1. Check that the phone is valid
-  const phone = typeof (data.queryStringObject.phone) == 'string' &&
-    data.queryStringObject.phone.trim().length == 10 ?
-    data.queryStringObject.phone.trim() : false;
-
-  if (phone) {
-    // 3.1.1 Vefify the token
-    // Get the token from the headers
-    const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
-    // 3.1.2 Verify the token is valid for the phone number
-    handlers._tokens.verifyToken(token, phone, (tokenIsValid) => {
-      if (tokenIsValid) {
-        // 3.2. Look up the user
-        _data.read('users', phone, (err, data) => {
-          if (!err && data) {
-            // 3.3. Remove the hashed pasword
-            delete data.hashedPassword;
-            callback(200, data);
-          } else {
-            callback(404, { 'Error': 'The user do not exist' });
-          }
-        });
-      } else {
-        callback(403, { 'Error': 'The token id is not valid, or expired' });
-      }
-    });
-  } else {
-    callback(400, { 'Error': 'Missing Required Field' });
-  }
-
-};
-
-// 3.4 Handlers USER PUT
-// @required: phone
-// @optional: firstName, lastName, password (at least one should be)
-// @todo: only authenticated users can update the data
-handlers._users.put = (data, callback) => {
-  // 3.4.1 Check for the required field
-  const phone = typeof (data.payload.phone) == 'string' &&
-    data.payload.phone.trim().length == 10 ?
-    data.payload.phone.trim() : false;
-  // 3.4.2 Check for the optional fields
-  const firstName = typeof (data.payload.firstName) == 'string' &&
-    data.payload.firstName.trim().length > 0 ?
-    data.payload.firstName.trim() : false;
-  const lastName = typeof (data.payload.lastName) == 'string' &&
-    data.payload.lastName.trim().length > 0 ?
-    data.payload.lastName.trim() : false;
-  const password = typeof (data.payload.password) == 'string' &&
-    data.payload.password.trim().length > 0 ?
-    data.payload.password.trim() : false;
-
-  // 3.4.2 Continue if the phone is valid
-  if (phone) {
-    // 3.4.3 Error if there's nothing to update
-    if (firstName || lastName || password) {
-
-      // 3.4.3.1 Verify the token
-      const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
-      handlers._tokens.verifyToken(token, phone, (tokenIsValid) => {
-        if (tokenIsValid) {
-          // 3.4.4. Look up the user
-          _data.read('users', phone, (err, userData) => {
-            if (!err && userData) {
-              // 3.4.5 Update the fields
-              if (firstName) {
-                userData.firstName = firstName;
-              }
-              if (lastName) {
-                userData.lastName = lastName;
-              }
-              if (password) {
-                userData.hashedPassword = helpers.hash(password);
-              }
-              // 3.4.5. Store the updates
-              _data.update('users', phone, userData, (err) => {
-                if (!err) {
-                  callback(200);
-                } else {
-                  console.log(err);
-                  callback(500, { 'Error': 'Could not update the user' });
-                }
-              });
-            } else {
-              callback(400, { 'Error': 'The specified user do not exist' });
-            }
-          });
-        } else {
-          callback(403, { 'Error': 'Token is invalid or expired' });
-        }
-      });
-    } else {
-      callback(400, { 'Error': 'Missing data to update' });
     }
-  } else {
-    callback(400, { 'Error': 'Missing Required Field' });
-  }
+  };
+
+  // 3.1.8 Send the payload as json
+  const payloadString = JSON.stringify(payload);
+  xhr.send(payloadString);
 };
 
-// 3.5 Handlers USER DELETE
-// @required: phone
-// @todo: only let the authenticated user delete object
-// @todo: delete any other assocciated files
-handlers._users.delete = (data, callback) => {
-  // 3.5.1. Check that the phone is valid
-  const phone = typeof (data.queryStringObject.phone) == 'string' &&
-    data.queryStringObject.phone.trim().length == 10 ?
-    data.queryStringObject.phone.trim() : false;
-  if (phone) {
+// 4. Bind the logout button
+app.bindLogoutButton = () => {
+  document.getElementById("logoutButton").addEventListener("click", (e) => {
 
-    // 3.5.1.1 Verify the token
-    const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
-    handlers._tokens.verifyToken(token, phone, (tokenIsValid) => {
-      if (tokenIsValid) {
-        _data.read('users', phone, (err, userData) => {
-          if (!err && userData) {
-            // 3.5.2 Delete the data
-            _data.delete('users', phone, (err) => {
-              if (!err) {
-                // 3.5.3 Delete the data associated with the user (checks)
-                const userChecks = typeof (userData.checks) == 'object' &&
-                  userData.checks instanceof Array ?
-                  userData.checks : [];
-                const checksToDelete = userChecks.length;
-                if (checksToDelete > 0) {
-                  // 3.5.4 Delete some checks
-                  let checksDeleted = 0;
-                  let deletionErrors = false;
-                  // 3.5.5 Loop  throught the checks
-                  userChecks.forEach((checkId) => {
-                    // 3.5.6 Delete a check
-                    _data.delete('checks', checkId, (err) => {
-                      if (err) {
-                        deletionErrors = true;
-                      }
-                      checksDeleted++;
-                      if (checksDeleted == checksToDelete) {
-                        if (!deletionErrors) {
-                          callback(200);
-                        } else {
-                          callback(500, { 'Error': 'Errors encountered, could not delete all the checks' });
-                        }
-                      }
-                    });
-                  });
-                } else {
-                  callback(200);
-                }
-              } else {
-                callback(500, { 'Error': 'Could not delete the user' });
-              }
-            })
-          } else {
-            callback(400, { 'Error': 'Could not find the specified user' });
-          }
-        });
-      } else {
-        callback(403, { 'Error': 'The token have expired, or invalid' });
-      }
-    });
-  } else {
-    callback(400, { 'Error': 'Missing Required Field' });
-  }
+    // 4.1 Stop it from redirecting anywhere
+    e.preventDefault();
+
+    // 4.2 Log the user out
+    app.logUserOut();
+  });
 };
 
-// 4. TOKEN SERVICE
-handlers.tokens = (data, callback) => {
-  const acceptableMethods = ['post', 'get', 'put', 'delete'];
-  if (acceptableMethods.indexOf(data.method) > -1) {
-    handlers._tokens[data.method](data, callback);
-  } else {
-    callback(405);
-  }
-};
+// 5. Log the user out then redirect them
+app.logUserOut = function (redirectUser) {
+  // Set redirectUser to default to true
+  redirectUser = typeof (redirectUser) == 'boolean' ? redirectUser : true;
 
-// 4.1 Container for the sub methods
-handlers._tokens = {};
+  // 5.1 Get the current token id
+  const tokenId = typeof (app.config.sessionToken.id) == 'string' ? app.config.sessionToken.id : false;
 
-// 4.2 Token POST
-// @required data: phone, password
-// @optional data: none
-handlers._tokens.post = (data, callback) => {
-  // 4.2.1 Check the required data
-  const phone = typeof (data.payload.phone) == 'string' &&
-    data.payload.phone.trim().length == 10 ?
-    data.payload.phone.trim() : false;
-  const password = typeof (data.payload.password) == 'string' &&
-    data.payload.password.trim().length > 0 ?
-    data.payload.password.trim() : false;
+  // 5.2 Send the currnt token to the tokens endpoint to delete it
+  let queryStringObject = {
+    id: tokenId
+  };
+  app.client.request(undefined, 'api/tokens', 'DELETE', queryStringObject, undefined, (statusCode, responsePayload) => {
+    // 5.3 Set the app.config token as false
+    app.setSessionToken(false);
 
-  if (phone && password) {
-    // 4.2.2 Look up the user who matches the phone
-    _data.read('users', phone, (err, userData) => {
-      if (!err && userData) {
-        // 4.2.3 Hash the send password and compare it to the stored password
-        const hashedPassword = helpers.hash(password);
-        if (hashedPassword == userData.hashedPassword) {
-          // 4.2.4 If valid create a new token with a random name. Set exparation data
-          const tokenId = helpers.createRandomString(20);
-          const expires = Date.now() + 1000 * 60 * 60;
-          const tokenObject = {
-            'phone': phone,
-            'id': tokenId,
-            'expires': expires
-          };
-          // Store the token
-          _data.create('tokens', tokenId, tokenObject, (err) => {
-            if (!err) {
-              callback(200, tokenObject);
-            } else {
-              callbacka(500, { 'Errror': 'Could not create a token' });
-            }
-          })
-        } else {
-          callback(400, { 'Error': 'Password did not match the specified users stored password' });
-        }
-      } else {
-        callback(400, { 'Error': 'Specified user do not exist' });
-      }
-    });
-  } else {
-    callback(400, { 'Error': 'Missing required Fields' });
-  }
-};
-// 4.3. Token GET
-// @required: id
-// @optional: none
-handlers._tokens.get = (data, callback) => {
-  // 4.3.1 Check that the id is valid
-  const id = typeof (data.queryStringObject.id) == 'string' &&
-    data.queryStringObject.id.trim().length == 20 ?
-    data.queryStringObject.id.trim() : false;
-  if (id) {
-    // Read teh token
-    _data.read('tokens', id, (err, tokenData) => {
-      if (!err && tokenData) {
-        callback(200, tokenData);
-      } else {
-        callback(404);
-      }
-    });
-  } else {
-    callback(400, { 'Error': 'Missing Required Fields' });
-  }
-}
-// 4.4 Token PUT
-// @require: id, extend
-// @optional: none
-handlers._tokens.put = (data, callback) => {
-  // 4.4.1 validate the required fileds
-  const id = typeof (data.payload.id) == 'string' &&
-    data.payload.id.trim().length == 20 ?
-    data.payload.id.trim() : false;
-  const extend = typeof (data.payload.extend) == 'boolean' &&
-    data.payload.extend == true ? true : false;
-  if (id && extend) {
-    // 4.4.2 Look up the token
-    _data.read('tokens', id, (err, tokenData) => {
-      if (!err && tokenData) {
-        // 4.4.3 Check if the token have not expired
-        if (tokenData.expires > Date.now()) {
-          // 4.4.4 Set the exparation to 1 hour into the future
-          tokenData.expires = Date.now() + 1000 * 60 * 60;
-          // 4.4.5 Save the data to disk
-          _data.update('tokens', id, tokenData, (err) => {
-            if (!err) {
-              callback(200);
-            } else {
-              callback(500, { 'Error': 'Could not update the token' });
-            }
-          })
-        } else {
-          callback(400, { 'Error': 'The token have expired' });
-        }
-      } else {
-        callback(400, { 'Error': 'Specified token do not exist' });
-      }
-    });
-  } else {
-    callback(400, { 'Error': 'Missing Required Fields or fields are invalid' });
-  }
-}
-// 4.5 Token Delete
-// @required: id
-// @optional: none
-handlers._tokens.delete = (data, callback) => {
-  // 4.5.1 Check if the id is valid
-  const id = typeof (data.queryStringObject.id) == 'string' &&
-    data.queryStringObject.id.trim().length == 20 ?
-    data.queryStringObject.id.trim() : false;
-  if (id) {
-    // 4.5.2 Look up the token
-    _data.read('tokens', id, (err, data) => {
-      if (!err && data) {
-        // 4.5.3 Delete the data
-        _data.delete('tokens', id, (err) => {
-          if (!err) {
-            callback(200);
-          } else {
-            callback(500, { 'Error': 'Could not delete the token' });
-          }
-        })
-      } else {
-        callback(400, { 'Error': 'Could not find the specified token ' });
-      }
-    })
-  } else {
-    callback(400, { 'Error': 'Missing Required Fields' });
-  }
-};
-
-
-
-// 4.6 Verify TokenId is currently valid for the given user
-handlers._tokens.verifyToken = (id, phone, callback) => {
-  // 4.6.1 Look up the token
-  _data.read('tokens', id, (err, tokenData) => {
-    if (!err && tokenData) {
-      // 4.6.2 Check taht the token is for the given user and have not expired
-      if (tokenData.phone == phone && tokenData.expires > Date.now()) {
-        callback(true);
-      } else {
-        callback(false);
-      }
-    } else {
-      callback(false);
+    // 5.4 Send the user to the logged out page
+    if (redirectUser) {
+      window.location = '/session/deleted';
     }
   });
 };
 
-// 5. CHECKS SERVICE
-handlers.checks = (data, callback) => {
-  const acceptableMethods = ['post', 'get', 'put', 'delete'];
-  if (acceptableMethods.indexOf(data.method) > -1) {
-    handlers._checks[data.method](data, callback);
-  } else {
-    callback(403);
-  }
-}
+// 4. Bind the forms
+app.bindForms = function () {
+  if (document.querySelector("form")) {
 
-// 5.1. Create a container for sub method for checks
-handlers._checks = {};
+    const allForms = document.querySelectorAll("form");
+    for (let i = 0; i < allForms.length; i++) {
+      allForms[i].addEventListener("submit", function (e) {
 
-// 5.2. Checks POST
-// @requried: protocol, url, method, successCodes, timeoutSeconds
-// @optional: none
-handlers._checks.post = (data, callback) => {
+        // 4.1 Stop the form submitting
+        e.preventDefault();
+        let formId = this.id;
+        let path = this.action;
+        let method = this.method.toUpperCase();
 
-  // 5.2.1 Validate the inputs
-  const protocol = typeof (data.payload.protocol) == 'string' &&
-    ['http', 'https'].indexOf(data.payload.protocol) > -1 ?
-    data.payload.protocol : false;
-  const url = typeof (data.payload.url) == 'string' &&
-    data.payload.url.trim().length > 0 ?
-    data.payload.url.trim() : false;
-  const method = typeof (data.payload.method) == 'string' &&
-    ['post', 'get', 'put', 'delete'].indexOf(data.payload.method) > -1 ?
-    data.payload.method : false;
-  const successCodes = typeof (data.payload.successCodes) == 'object' &&
-    data.payload.successCodes instanceof Array &&
-    data.payload.successCodes.length > 0 ?
-    data.payload.successCodes : false;
-  const timeoutSeconds = typeof (data.payload.timeoutSeconds) == 'number' &&
-    data.payload.timeoutSeconds % 1 === 0 &&
-    data.payload.timeoutSeconds >= 1 &&
-    data.payload.timeoutSeconds <= 5 ?
-    data.payload.timeoutSeconds : false;
+        // 4.2.1 Hide the error message (if it's currently show due to a previous error)
+        document.querySelector(`#${formId} .formError`).style.display = 'none';
 
-  if (protocol && url && method && successCodes && timeoutSeconds) {
-    // 5.2.2 Check that the token is valid
-    const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
-    // 5.2.3. Look up the user by reading the token
-    _data.read('tokens', token, (err, tokenData) => {
-      if (!err && tokenData) {
-        // 5.2.4. Get the user phone number
-        const userPhone = tokenData.phone;
-        // 5.2.5 Ge the user data
-        _data.read('users', userPhone, (err, userData) => {
-          if (!err && userData) {
-            const userChecks = typeof (userData.checks) == 'object' &&
-              userData.checks instanceof Array ?
-              userData.checks : [];
-            // 5.2.6 Verify that the user has less than the maximumChecks number
-            if (userChecks.length < config.maxChecks) {
-              // 5.2.7 Create the random id for the new check
-              const checkId = helpers.createRandomString(20);
-              // 5.2.8 Create the checksObject and include the usersPhone
-              const checkObject = {
-                'id': checkId,
-                'userPhone': userPhone,
-                'protocol': protocol,
-                'url': url,
-                'method': method,
-                'successCodes': successCodes,
-                'timeoutSeconds': timeoutSeconds
-              };
-              // 5.2.9 Save the object to the system
-              _data.create('checks', checkId, checkObject, (err) => {
-                if (!err) {
-                  // 5.2.10. Add the checkId to the userObject
-                  userData.checks = userChecks;
-                  userData.checks.push(checkId);
-                  // 5.2.11 Save the new data
-                  _data.update('users', userPhone, userData, (err) => {
-                    if (!err) {
-                      // 5.2.12 Return the data about the new check to the requestor
-                      callback(200, checkObject);
-                    } else {
-                      callback(500, { 'Error': 'Could not update the user with the new check' });
-                    }
-                  })
-                } else {
-                  callback(500, { 'Error': 'Could not create the new check' });
-                }
-              })
+        // 4.2.2 Hide the success messaage (if it's currently shown due to a previous error)
+        if (document.querySelector("#" + formId + " .formSuccess")) {
+          document.querySelector("#" + formId + " .formSuccess").style.display = 'none';
+        }
+        // 4.3 Turn the input into a payload
+        let payload = {};
+        let elements = this.elements;
+        for (let i = 0; i < elements.length; i++) {
+          if (elements[i].type !== 'submit') {
+            // 4.3.1 Determine class of element and set value accordingly
+            const classOfElement = typeof (elements[i].classList.value) == 'string' && elements[i].classList.value.length > 0 ? elements[i].classList.value : '';
+            const valueOfElement = elements[i].type == 'checkbox' && classOfElement.indexOf('multiselect') == -1 ? elements[i].checked : classOfElement.indexOf('intval') == -1 ? elements[i].value : parseInt(elements[i].value);
+            const elementIsChecked = elements[i].checked;
+            // 4.3.2 Override the method of the form if the input's name is _method
+            let nameOfElement = elements[i].name;
+            if (nameOfElement == '_method') {
+              method = valueOfElement;
             } else {
-              callback(400, { 'Error': `The user already has the maximum number of checks ${config.maxChecks}` });
+              // 4.3.3 Create an payload field named "method" if the elements name is actually httpmethod
+              if (nameOfElement == 'httpmethod') {
+                nameOfElement = 'method';
+              }
+              // 4.3.4 Create an paylaod field named "id" if the elements name is actually uid
+              if (nameOfElement == 'uid') {
+                nameOfElement = 'id';
+              }
+              // 4.3.5 If the element has the class "multiselect" add this value(s) as array elements
+              if (classOfElement.indexOf('multiselect') > -1) {
+                if (elementIsChecked) {
+                  payload[nameOfElement] = typeof (payload[nameOfElement]) == 'object' && payload[nameOfElement] instanceof Array ? payload[nameOfElement] : [];
+                  payload[nameOfElement].push(valueOfElement);
+                }
+              } else {
+                payload[nameOfElement] = valueOfElement;
+              }
+            }
+          }
+        }
+
+
+        // 4.4.1 If the method is DELETE, the payload shoulld be a queryStringObject instead
+        const queryStringObject = method == 'DELETE' ? payload : {};
+
+        // 4.4 Call the API
+        app.client.request(undefined, path, method, queryStringObject, payload, (statusCode, responsePayload) => {
+          // 4.4.1 Display an error on the form if needed
+          if (statusCode !== 200) {
+
+            if (statusCode == 403) {
+              app.logUserOut();
+            } else {
+
+              // 4.4.2 Try to get the error from the api, or set a default erorr message
+              const error = typeof (responsePayload.Error) == 'string' ? responsePayload.Error : 'An error has occured, please try again';
+
+              // 4.4.3 Set the formError field with the error text
+              document.querySelector("#" + formId + " .formError").innerHTML = error;
+
+              // 4.4.4 Show (unhide) the form error field on the form
+              document.querySelector("#" + formId + " .formError").style.display = 'block';
             }
           } else {
-            callback(403, { 'Error': 'The user do not exist' });
+            // 4.4.5 If successful, send to form response processor
+            app.formResponseProcessor(formId, payload, responsePayload);
           }
-        })
+        });
+      });
+    }
+  }
+};
+
+// 5. Form response processor
+app.formResponseProcessor = (formId, requestPayload, responsePayload) => {
+  // 5.1 Function to call
+  let functionToCall = false;
+  // 5.2 if account creation was successfull, try to immediately log the user in
+  if (formId == 'accountCreate') {
+    // 5.3 take the phone and password, and use it to log the user in
+    let newPayload = {
+      'phone': requestPayload.phone,
+      'password': requestPayload.password
+    };
+    // 5.4 Call the app client
+    app.client.request(undefined, 'api/tokens', 'POST', undefined, newPayload, (newStatusCode, newResponsePayload) => {
+      // 5.5. Display an error on the form if needed
+      if (newStatusCode !== 200) {
+
+        // 5.6. Set the formError field with the error text
+        document.querySelector("#" + formId + " .formError").innerHTML = 'Sorry, an error has occured. Please try again.';
+
+        // 5.7 Show (unhide) the form error field on the form
+        document.querySelector("#" + formId + " .formError").style.display = 'block';
       } else {
-        callback(403, { 'Error': 'Token is invalid, or expired' });
+        // if successful, set the token and redirect the user
+        app.setSessionToken(newResponsePayload);
+        window.location = '/checks/all';
       }
     });
-  } else {
-    callback(400, { 'Error': 'Missing Required inputs, or inputs are invalid' });
   }
-}
+  // 5.8 If login was successful, set the token in localstorage and reidrect the user
+  if (formId == 'sessionCreate') {
+    app.setSessionToken(responsePayload);
+    window.location = '/checks/all';
+  }
 
-// 5.3. Checks GET
-// @requried: id
-// @optional: none
-handlers._checks.get = (data, callback) => {
-  // 5.3.1. Check that id is valid
-  const id = typeof (data.queryStringObject.id) == 'string' &&
-    data.queryStringObject.id.trim().length == 20 ?
-    data.queryStringObject.id.trim() : false;
-  if (id) {
-    // 5.3.2 Look up the check
-    _data.read('checks', id, (err, checkData) => {
-      if (!err && checkData) {
-        // 5.3.3. Varify the token
-        const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
-        handlers._tokens.verifyToken(token, checkData.userPhone, (tokenIsValid) => {
-          if (tokenIsValid) {
-            // 5.3.4 Return the data to the user
-            callback(200, checkData);
+  // 5.9 IF forms saved successfully and they have success messages , show them
+  const formsWithSuccessMessages = ['accountEdit1', 'accountEdit2'];
+  if (formsWithSuccessMessages.indexOf(formId) > -1) {
+    document.querySelector("#" + formId + " .formSuccess").style.display = 'block';
+  }
+
+  // 5.10 If the user just deleted their account, redirect them to the account-delete page
+  if (formId == 'accountEdit3') {
+    app.logUserOut(false);
+    window.location = '/account/deleted';
+  }
+
+  // 5.11 If the user just created a new check successfully, redirect back to the dashboard
+  if (formId == 'checksCreate') {
+    window.location = '/checks/all';
+  }
+
+  // 5.12 If the user just deleted a check, redirect them to the dashboard
+  if (formId == 'checksEdit2') {
+    window.location = '/checks/all';
+  }
+};
+
+// 6. GET THE SESSIUN TOKEN: from localstorage and set it in the app.config object
+app.getSessionToken = () => {
+  const tokenString = localStorage.getItem('token');
+  if (typeof (tokenString) == 'string') {
+    try {
+      const token = JSON.parse(tokenString);
+      app.config.sessionToken = token;
+      if (typeof (token) == 'object') {
+        app.setLoggedInClass(true);
+      } else {
+        app.setLoggedInClass(false);
+      }
+    } catch (e) {
+      app.config.sessionToken = false;
+      app.setLoggedInClass(false);
+    }
+  }
+};
+
+// 7. Set or remove the loggedIn class from the body
+app.setLoggedInClass = (add) => {
+  let target = document.querySelector("body");
+  if (add) {
+    target.classList.add('loggedIn');
+  } else {
+    target.classList.remove('loggedIn');
+  }
+};
+
+// 8. Set the session token in the app.config object as well as localStorage
+app.setSessionToken = (token) => {
+  app.config.sessionToken = token;
+  let tokenString = JSON.stringify(token);
+  localStorage.setItem('token', tokenString);
+  if (typeof (token) == 'object') {
+    app.setLoggedInClass(true);
+  } else {
+    app.setLoggedInClass(false);
+  }
+};
+
+// 9. Renew the token
+app.renewToken = (callback) => {
+  // 9.1 Check the type and proceed if token true
+  let currentToken = typeof (app.config.sessionToken) == 'object' ? app.config.sessionToken : false;
+  if (currentToken) {
+    // 9.2 Update the token with a new expiration
+    let payload = {
+      'id': currentToken.id,
+      'extend': true,
+    };
+    app.client.request(undefined, 'api/tokens', 'PUT', undefined, payload, (statusCode, responsePayload) => {
+      // 9.3 Display an error on the form if needed
+      if (statusCode == 200) {
+        // 9.4 get the new token details
+        let queryStringObject = { 'id': currentToken.id };
+        app.client.request(undefined, 'api/tokens', 'GET', queryStringObject, undefined, (statusCode, responsePayload) => {
+          // 9.5 Display an error on the form if needed
+          if (statusCode == 200) {
+            app.setSessionToken(responsePayload);
+            callback(false);
           } else {
-            callback(403, { 'Error': 'The provided token is invalid' });
+            app.setSessionToken(false);
+            callback(true);
           }
         });
       } else {
-        callback(404, { 'Error': 'There no such check data' });
+        app.setSessionToken(false);
+        callback(true);
       }
-    })
+    });
   } else {
-    callback(400, { 'Error': 'The id is invalid' });
+    app.setSessionToken(false);
+    callback(true);
   }
-}
+};
 
-// 5.4. Checks PUT
-// @requried: id
-// @optional: protocol, url, method, successCodes, timeoutSeconds ( one should be present)
-handlers._checks.put = (data, callback) => {
-  // 5.4.1 Check for the required fields type
-  const id = typeof (data.payload.id) == 'string' &&
-    data.payload.id.trim().length == 20 ?
-    data.payload.id.trim() : false;
-  // 5.4.2 Check for optional fields type
-  const protocol = typeof (data.payload.protocol) == 'string' &&
-    ['https', 'http'].indexOf(data.payload.protocol) > - 1 ?
-    data.payload.protocol : false;
-  const url = typeof (data.payload.url) == 'string' &&
-    data.payload.url.trim().length > 0 ?
-    data.payload.url.trim() : false;
-  const method = typeof (data.payload.method) == 'string' &&
-    ['post', 'get', 'put', 'delete'].indexOf(data.payload.method) > -1 ?
-    data.payload.method : false;
-  const successCodes = typeof (data.payload.successCodes) == 'object' &&
-    data.payload.successCodes instanceof Array &&
-    data.payload.successCodes.length > 0 ?
-    data.payload.successCodes : false;
-  const timeoutSeconds = typeof (data.payload.timeoutSeconds) == 'number' &&
-    data.payload.timeoutSeconds % 1 === 0 &&
-    data.payload.timeoutSeconds >= 1 &&
-    data.payload.timeoutSeconds <= 5 ?
-    data.payload.timeoutSeconds : false;
+// 10. Load Data on the page
+app.loadDataOnPage = () => {
+  // 10.1 Get the current page form the body class
+  let bodyClasses = document.querySelector("body").classList;
+  let primaryClass = typeof (bodyClasses[0]) == 'string' ? bodyClasses[0] : false;
+  // 10.2 Logic for account settings page
+  if (primaryClass == 'accountEdit') {
+    app.loadAccountEditPage();
+  }
 
-  // 5.4.3 Check for id validation
-  if (id) {
-    // 5.4.4 Check for optional fields
-    if (protocol || url || method || successCodes || timeoutSeconds) {
-      // 5.4.5. Look up the check
-      _data.read('checks', id, (err, checkData) => {
-        if (!err && checkData) {
-          // 5.4.6 Verify token data
-          const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
-          handlers._tokens.verifyToken(token, checkData.userPhone, (tokenIsValid) => {
-            if (tokenIsValid) {
-              // 5.4.7 Update the check where neccessary
-              if (protocol) {
-                checkData.protocol = protocol;
-              }
-              if (url) {
-                checkData.url = url;
-              }
-              if (method) {
-                checkData.method = method;
-              }
-              if (successCodes) {
-                checkData.successCodes = successCodes;
-              }
-              if (timeoutSeconds) {
-                checkData.timeoutSeconds = timeoutSeconds;
-              }
-              // 5.4.8 Store the update
-              _data.update('checks', id, checkData, (err) => {
-                if (!err) {
-                  callback(200);
-                } else {
-                  callback(500, { 'Error': 'Could not update the check' });
-                }
-              })
-            } else {
-              callback(403, { 'Error': 'Your not authorized' });
-            }
-          })
-        } else {
-          callback(400, { 'Error': 'There is no check data id' });
+  // 10.3 Logic for dashboard page
+  if (primaryClass == 'checksList') {
+    app.loadChecksListPage();
+  }
+
+  // 10.4 Logic for check details page
+  if (primaryClass == 'checksEdit') {
+    app.loadChecksEditPage();
+  }
+};
+
+// 11. Load the account edit page specifically
+app.loadAccountEditPage = () => {
+  // 11.1 Get the phone number from the current token, or log the user our if none is there
+  let phone = typeof (app.config.sessionToken.phone) == 'string' ? app.config.sessionToken.phone : false;
+  if (phone) {
+    // 11.2 Fetch the user data
+    let queryStringObject = {
+      'phone': phone
+    };
+    app.client.request(undefined, 'api/users', 'GET', queryStringObject, undefined, (statusCode, responsePayload) => {
+      if (statusCode == 200) {
+        // 11.3 Put the data into the forms as values where needed
+        document.querySelector("#accountEdit1 .firstNameInput").value = responsePayload.firstName;
+        document.querySelector("#accountEdit1 .lastNameInput").value = responsePayload.lastName;
+        document.querySelector("#accountEdit1 .displayPhoneInput").value = responsePayload.phone;
+
+        // 11.4 Put the hidden phone field into both forms
+        let hiddenPhoneInputs = document.querySelectorAll('input.hiddenPhoneNumberInput');
+        for (let i = 0; i < hiddenPhoneInputs.length; i++) {
+          hiddenPhoneInputs[i].value = responsePayload.phone;
         }
-      });
-    } else {
-      callback(400, { 'Error': 'No fields to update' });
-    }
-  } else {
-    callback(400, { 'Erorr': 'Missing Required field' });
-  }
-}
-
-// 5.5. Checks DELETE
-// @requried: id
-// @optional: none
-handlers._checks.delete = (data, callback) => {
-  // 5.5.1  Check if id is valid
-  const id = typeof (data.queryStringObject.id) == 'string' &&
-    data.queryStringObject.id.trim().length == 20 ?
-    data.queryStringObject.id.trim() : false;
-  if (id) {
-    // 5.5.2 Look up the check to delete
-    _data.read('checks', id, (err, checkData) => {
-      if (!err && checkData) {
-        const token = typeof (data.headers.token) == 'string' ? data.headers.token : false;
-        handlers._tokens.verifyToken(token, checkData.userPhone, (tokenIsValid) => {
-          if (tokenIsValid) {
-            // 5.5.3 Delete the check data
-            _data.delete('checks', id, (err) => {
-              if (!err) {
-                // 5.5.4 Look up the user and modify the check
-                _data.read('users', checkData.userPhone, (err, userData) => {
-                  if (!err && userData) {
-                    // 5.5.5 Find the userChecks
-                    const userChecks = typeof (userData.checks) == 'object' && userData.checks instanceof Array ?
-                      userData.checks : [];
-                    // 5.5.6 Remove the deleted checks form the checks
-                    const checkPosition = userChecks.indexOf(id);
-                    if (checkPosition > -1) {
-                      userChecks.splice(checkPosition, 1);
-                      //5.5.7 resave the users data
-                      _data.update('users', checkData.userPhone, userData, (err) => {
-                        if (!err) {
-                          callback(200);
-                        } else {
-                          callback(500, { 'Error': 'Could not update the user' });
-                        }
-                      });
-                    } else {
-                      callback(500, { 'Error': 'Could not find the checks on the user object so could not remove it' });
-                    }
-
-                  } else {
-                    callback(500, { 'Error': 'Could notfind the user who created the cehck, so could not delete the check from the list of checks' });
-                  }
-                });
-              } else {
-                callback(500, { 'Error': 'Could not delete the check data' });
-              }
-            })
-          } else {
-            callback(403, { 'Error': 'Token is invalid or expired' });
-          }
-        })
       } else {
-        callback(400, { 'Error': ' There is no such check by id' });
+        // If the request comes back as something other than 200, log the user our (on the assumption that the api is temporarily down or the users token is bad)
+        app.logUserOut();
       }
-    })
+    });
   } else {
-    callback(403, { 'Error': 'Missing required field' });
+    app.logUserOut();
   }
-}
+};
 
-// 9. Export the handlers
-module.exports = handlers;
+// 12. Load the dashboard page specificale
+app.loadChecksListPage = () => {
+  // 12.1 Get the phone number from the current token, or log the user out if none is there
+  const phone = typeof (app.config.sessionToken.phone) == 'string' ? app.config.sessionToken.phone : false;
+  if (phone) {
+    // 12.2 Fetch the user data
+    const queryStringObject = {
+      'phone': phone
+    };
+    app.client.request(undefined, 'api/users', 'GET', queryStringObject, undefined, (statusCode, responsePayload) => {
+      if (statusCode == 200) {
+
+        // 12.3 Determine how many checks the user has
+        let allChecks = typeof (responsePayload.checks) == 'object' && responsePayload.checks instanceof Array && responsePayload.checks.length > 0 ? responsePayload.checks : [];
+        if (allChecks.length > 0) {
+
+          // 12.4 Show each created check as a new row in the table
+          allChecks.forEach((checkId) => {
+            // 12.5 Get the data for the check
+            let newQueryStringObject = {
+              'id': checkId
+            };
+            app.client.request(undefined, 'api/checks', 'GET', newQueryStringObject, undefined, (statusCode, responsePayload) => {
+              if (statusCode == 200) {
+                let checkData = responsePayload;
+                // 12.5 Make the check data into a table row
+                let table = document.getElementById("checksListTable");
+                let tr = table.insertRow(-1);
+                tr.classList.add('checkRow');
+                let td0 = tr.insertCell(0);
+                let td1 = tr.insertCell(1);
+                let td2 = tr.insertCell(2);
+                let td3 = tr.insertCell(3);
+                let td4 = tr.insertCell(4);
+                td0.innerHTML = responsePayload.method.toUpperCase();
+                td1.innerHTML = responsePayload.protocol + '://';
+                td2.innerHTML = responsePayload.url;
+                let state = typeof (responsePayload.state) == 'string' ? responsePayload.state : 'unknown';
+                td3.innerHTML = state;
+                td4.innerHTML = '<a href="/checks/edit?id=' + responsePayload.id + '">View / Edit / Delete</a>';
+              } else {
+                console.log("Error trying to load check ID: ", checkId);
+              }
+            });
+          });
+
+          if (allChecks.length < 5) {
+            // 12.6 Show the createCheck CTA
+            document.getElementById("createCheckCTA").style.display = 'block';
+          }
+        } else {
+          // 12.7 Show 'you have no checks' message
+          document.getElementById("noChecksMessage").style.display = 'table-row';
+
+          // 12.8 Show the createCheck CTA
+          document.getElementById("createCheckCTA").style.display = 'block';
+
+        }
+      } else {
+        // 12.9 If the request comes back as something other than 200, log the user our (on the assumption that the api is temporarily down or the users token is bad)
+        app.logUserOut();
+      }
+    });
+  } else {
+    app.logUserOut();
+  }
+};
+
+
+// 13. Load the checks edit page specifically
+app.loadChecksEditPage = () => {
+  // 13.1 Get the checks id from the query string, if none is found then redirect back to dashboard
+  const id = typeof (window.location.href.split('=')[1]) == 'string' && window.location.href.split('=')[1].length > 0 ? window.location.href.split('=')[1] : false;
+  if (id) {
+    // 13.2 Fetch the check data
+    let queryStringObject = {
+      'id': id
+    };
+    app.client.request(undefined, 'api/checks', 'GET', queryStringObject, undefined, (statusCode, responsePayload) => {
+      if (statusCode == 200) {
+        // 13.3 Put the hidden id field into both forms
+        let hiddenIdInputs = document.querySelectorAll("input.hiddenIdInput");
+        for (let i = 0; i < hiddenIdInputs.length; i++) {
+          hiddenIdInputs[i].value = responsePayload.id;
+        }
+
+        // 13.4 Put the data into the top form as values where needed
+        document.querySelector("#checksEdit1 .displayIdInput").value = responsePayload.id;
+        document.querySelector("#checksEdit1 .displayStateInput").value = responsePayload.state;
+        document.querySelector("#checksEdit1 .protocolInput").value = responsePayload.protocol;
+        document.querySelector("#checksEdit1 .urlInput").value = responsePayload.url;
+        document.querySelector("#checksEdit1 .methodInput").value = responsePayload.method;
+        document.querySelector("#checksEdit1 .timeoutInput").value = responsePayload.timeoutSeconds;
+        const successCodeCheckboxes = document.querySelectorAll("#checksEdit1 input.successCodesInput");
+        for (let i = 0; i < successCodeCheckboxes.length; i++) {
+          if (responsePayload.successCodes.indexOf(parseInt(successCodeCheckboxes[i].value)) > -1) {
+            successCodeCheckboxes[i].checked = true;
+          }
+        }
+      } else {
+        // if the request comes back as something other than 200, redirect back to dashboard
+        window.location = '/checks/all';
+      }
+    });
+  } else {
+    window.location = '/checks/all';
+  }
+};
+
+// 10. Loop to renew token often
+app.tokenRenewalLoop = () => {
+  setInterval(() => {
+    app.renewToken((err) => {
+      if (!err) {
+        console.log("Token renewed successfully @ " + Date.now());
+      }
+    });
+  }, 1000 * 60);
+};
+
+// 11. Init (bootstrapping)
+app.init = () => {
+  // 11.1 Bind all form submition
+  app.bindForms();
+
+  // 11.2 Bind the logout button
+  app.bindLogoutButton();
+
+  // 11.3 Get the token from localStorage
+  app.getSessionToken();
+
+  // 11.4 Renew Token
+  app.tokenRenewalLoop();
+
+  // 11.5 Load data on page
+  app.loadDataOnPage();
+};
+
+// 12. Call the init process after the window loads
+window.onload = () => {
+  app.init();
+};

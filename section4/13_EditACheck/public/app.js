@@ -137,8 +137,6 @@ app.bindForms = function () {
         if (document.querySelector("#" + formId + " .formSuccess")) {
           document.querySelector("#" + formId + " .formSuccess").style.display = 'none';
         }
-
-
         // 4.3 Turn the input into a payload
         let payload = {};
         let elements = this.elements;

@@ -117,7 +117,7 @@ server.unifiedServer = (req, res) => {
       }
       if (contentType == 'plain') {
         res.setHeader('Content-Type', 'text/plain');
-        payloadString = typeof (payload) !== 'string' ? payload : '';
+        payloadString = typeof (payload) == 'string' ? payload : '';
       }
       // 7.7.4.4 CONTENT COMMON: parts
       res.writeHead(statusCode);
