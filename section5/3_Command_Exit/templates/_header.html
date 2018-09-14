@@ -1,0 +1,38 @@
+<html>
+
+<head>
+  <!-- General Settings -->
+  <meta charset="utf-8">
+  <meta http-equiv="content-language" content="en-us">
+  <base href="{global.baseUrl}" />
+  <!-- Meta Tags -->
+  <title>{head.title} | {global.appName}</title>
+  <meta name="description" content="{head.description}">
+  <!--LIST THE Static Assets-->
+  <link type="image/x-icon" rel="icon" href="favicon.ico">
+  <script type="text/javascript" charset="utf-8" src="public/app.js"></script>
+  <link rel="stylesheet" type="text/css" href="public/app.css">
+</head>
+
+<body class="{body.class}">
+  <!-- Page Wrapper-->
+  <div class="wrapper">
+    <!-- Header-->
+    <div class="header">
+      <!-- LOGO-->
+      <a href="/" class="logo">
+        <img src="public/logo.png" alt="logo" />
+      </a>
+      <!-- Navigation-->
+      <ul class="menu">
+        <li><a href="/">Home</a></li>
+        <li class="loggedOut"><a href="/account/create">SingUp</a></li>
+        <li class="loggedOut"><a href="/session/create">LogIn</a></li>
+        <li class="loggedIn"><a href="/checks/all">Dashboard</a></li>
+        <li class="loggedIn"><a href="/account/edit">Account Settings</a></li>
+        <li class="loggedIn"><a href="#" id="logoutButton">LogOut</a></li>
+      </ul>
+    </div>
+
+    <!-- Page Specific content-->
+    <div class="content">

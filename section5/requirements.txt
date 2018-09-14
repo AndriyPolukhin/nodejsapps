@@ -1,0 +1,24 @@
+# Create a CLI for the APP
+
+## INPUT & OUTPUT PROGRAMM
+## Event-driven design pattern
+
+## EVENTS:
+### 1. "EXIT"
+
+### 2. "MAN" / "HELP"
+
+### 3. "STATS"
+
+### 4. "LIST USERS"
+
+### 5. "MORE USER INFO --{userId}"
+
+### 6. "LIST CHECKS" / "LIST CHECKS --up" / "LIST CHECKS --down"
+
+### 7. "MORE CHECKS INFO --{checkId}"
+
+### 8. "LIST LOGS"
+
+### 9. "MORE LOG INFO --{logId}"
+
