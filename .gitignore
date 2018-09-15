@@ -12,3 +12,4 @@ nodeFiles.code-workspace
 .log
 .logs
 .data
+.pem
