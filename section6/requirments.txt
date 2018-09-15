@@ -1,0 +1,28 @@
+## TESTING
+
+# Debuger
+# Linting
+# Commenting
+# Bullet-proof the code
+
+
+## STABILITY WITH NODE APPLIICATION
+
+### Create, use and catch ERRORs
+
+### USE OF THE DEBUGGER
+#### COMMANDS
+  ### node inspect index.js
+  ### cont
+  ### next
+  ### in
+  ### out
+  ### pause
+
+### USE THE STRICT : Linting
+
+### CREATE A TEST RUNNER, and INTERGRATION TESTs
+
+### UNIT TEST !!!
+
+
