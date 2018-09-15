@@ -9,3 +9,6 @@ ehthumbs.db
 Thumbs.db
 node_modules
 nodeFiles.code-workspace
+.log
+.logs
+.data
