@@ -20,8 +20,10 @@
   ### pause
 
 ### USE THE STRICT : Linting
+node --use_strict index.js
 
 ### CREATE A TEST RUNNER, and INTERGRATION TESTs
+node test ( if file name is index, then you just need to specify the directory)
 
 ### UNIT TEST !!!
 
