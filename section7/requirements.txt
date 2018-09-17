@@ -1,0 +1,15 @@
+### REFACTOR TO SCALE
+
+## USE OF FS AS DATA STORE
+
+## Performance HOOCKS
+### performance or speed problems. Timing the execution of the code.
+
+## CLUSTER MODULE
+  ### USING MORE CPU by the application if they are available
+
+
+## CHILD PROCESSES
+  ### Other application that can help node to work: example binary processes
+
+
